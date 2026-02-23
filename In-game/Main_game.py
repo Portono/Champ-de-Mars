@@ -270,7 +270,7 @@ class AOE:
         self.rayon=rayon
         self.degat=degat_par_tick+upgrades_joueur["degats_aoe"]
 
-        self.duree=duree_ms
+        self.duree=duree_ms+upgrades_joueur["duree_aoe"]*100  ##Durée totale de l'AOE en millisecondes
         self.interval_tick=interval_tick_ms
         self.sprite=sprite
 
@@ -429,7 +429,7 @@ def lancer_jeu(settings):
                     pv_joueur = int(pv_joueur * (pv_max_joueur / ancien_pv_max))
                 vitesse_joueur=width/300+(upgrades_joueur["vitesse"])*width/900
                 laser=weapon_main(500/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_laser,homing=False,portee_detection=width/10+upgrades_joueur["portee"]*10,vitesse=width/200+upgrades_joueur["vitesse_balles"]/10,degat=1+upgrades_joueur["degats"])  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
-                roquette=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_roquette,homing=True,portee_detection=width/5+upgrades_joueur["portee"]*10,vitesse=width/300+upgrades_joueur["vitesse_balles"]/10,aoe=True,aoe_rayon=width/20+5*upgrades_joueur["deflagrations"],degat=3+upgrades_joueur["degats"],degat_AOE=1+upgrades_joueur["degats_aoe"],duree_AOE=333+upgrades_joueur["duree_aoe"])  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
+                roquette=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_roquette,homing=True,portee_detection=width/5+upgrades_joueur["portee"]*10,vitesse=width/300+upgrades_joueur["vitesse_balles"]/10,aoe=True,aoe_rayon=width/20+5*upgrades_joueur["deflagrations"],degat=3+upgrades_joueur["degats"],degat_AOE=1+upgrades_joueur["degats_aoe"],duree_AOE=333)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
                 type_armes=[laser,roquette]   ##Liste des types d'armes
                 #Explosion
                 sprite_explosion_roquette=[]
@@ -502,6 +502,8 @@ def lancer_jeu(settings):
 
                     if hit_ennemi:
                         hit_ennemi.hp -= proj.degat
+                        if upgrades_joueur["vol_de_vie"]>0:
+                            pv_joueur=min(pv_joueur+upgrades_joueur["vol_de_vie"],pv_max_joueur)
                     if proj in liste_projectiles:
                         liste_projectiles.remove(proj)
             for e in liste_ennemis[:]:
