@@ -8,7 +8,6 @@ from random_module import*
 
 pygame.init()
 echelle_difficulte=0
-ennemy_spawn_delay=4000  ##Délai entre chaque spawn d'ennemi en millisecondes
 vitesse_joueur = 0  ##Vitesse de deplacement du joueur (définie dans lancer_jeu)
 image_marcel=None
 image_marcel_liste=[]
@@ -18,6 +17,7 @@ upgrades_joueur={}  ##défini dans lancer_jeu
 laser_sprite=None
 roquette_sprite=None
 sprite_explosion_roquette=None
+enemi_spawn_delay=2000
 # Couleurs (importées de Menu)
 red = (255, 0, 0)
 green = (0, 255, 0)
@@ -90,33 +90,33 @@ class ennemi_main:
 
 class ennemi_simple(ennemi_main):
     """Classe des ennemis simples"""
-    spawn_delay=ennemy_spawn_delay
+    spawn_delay=enemi_spawn_delay
     def __init__(self,x,y):
         super().__init__(x,y,vitesse=width/600,hp=3,xp=2,degat=10)  ##Appelle le constructeur de la classe parente avec une vitesse de 2
 
 
 class Marcel(ennemi_main):
     """Classe des ennemis rapides"""
-    spawn_delay=ennemy_spawn_delay*1.5
+    spawn_delay=enemi_spawn_delay*1.5
     def __init__(self,x,y):
         super().__init__(x,y,vitesse=width/300,hp=2,xp=2,sprite=image_marcel_liste,taille_hitbox=[image_marcel_liste[0].get_width(),image_marcel_liste[0].get_height()],degat=5)  ##Appelle le constructeur de la classe parente avec une vitesse de 4
 
 class ennemi_tireur(ennemi_main):
     """Classe des ennemis tireurs"""
-    spawn_delay=ennemy_spawn_delay*3
+    spawn_delay=enemi_spawn_delay*3
     def __init__(self,x,y):
         arme_ennemi=weapon_main(1000-echelle_difficulte, projectile_ennemi,homing=False,portee_detection=1/3*height,vitesse=width/400+echelle_difficulte)  ##Crée une arme pour l'ennemi avec un délai de 1000ms entre chaque tir et des projectiles non homing
         super().__init__(x,y,vitesse=width/600,hp=1,arme=arme_ennemi,xp=1,degat=7)  ##Appelle le constructeur de la classe parente avec une vitesse de 1 et une arme
 
 class Philippe(ennemi_main):
     """Classe des ennemis lourds"""
-    spawn_delay=ennemy_spawn_delay*2
+    spawn_delay=enemi_spawn_delay*2
     def __init__(self,x,y):
         super().__init__(x,y,vitesse=width/1200,hp=5,xp=3,sprite=image_philippe_liste,taille_hitbox=[image_philippe_liste[0].get_width(),image_philippe_liste[0].get_height()],degat=20)
 
 class projectiles_general:
     """Classe principale des projectiles"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,couleur=(0,255,0),degat=1,range=10,aoe=False,aoe_rayon=None):  ##AJOUTER PLUS TARD SPRITE AVEC CHEMIN D'ACCES ET COULEUR SERT SEULEMENT SI PAS DE SPRITE
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,couleur=(0,255,0),degat=1,range=10,aoe=False,aoe_rayon=None,degat_AOE=1):  ##AJOUTER PLUS TARD SPRITE AVEC CHEMIN D'ACCES ET COULEUR SERT SEULEMENT SI PAS DE SPRITE
         self.x=x
         self.y=y
         self.start_x=x
@@ -126,6 +126,7 @@ class projectiles_general:
         self.homing=homing
         self.couleur=couleur
         self.degat=degat
+        self.degat_AOE=degat_AOE
         self.range=range
         self.image = sprite_path
         self.aoe=aoe
@@ -180,10 +181,10 @@ class projectile_laser(projectiles_general):
 
 class projectile_roquette(projectiles_general):
     """Classe des projectiles roquettes"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite=None,degat=3,range=10,aoe=True,aoe_rayon=None):
+    def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite=None,degat=3,range=10,aoe=True,aoe_rayon=None,degat_AOE=1):
         if aoe_rayon is None:
             aoe_rayon=width/10
-        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+upgrades_joueur["degats"],range=range,aoe=aoe,aoe_rayon=aoe_rayon)  ##Appelle le constructeur de la classe parente avec une couleur orange
+        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+upgrades_joueur["degats"],range=range,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE)  ##Appelle le constructeur de la classe parente avec une couleur orange
 
 class projectile_ennemi(projectiles_general):
     """Classe des projectiles ennemis"""
@@ -399,7 +400,7 @@ def lancer_jeu(settings):
                     pv_joueur = int(pv_joueur * (pv_max_joueur / ancien_pv_max))
                 vitesse_joueur=width/300+(upgrades_joueur["vitesse"])*width/900
                 laser=weapon_main(500/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_laser,homing=False,portee_detection=width/10+upgrades_joueur["portee"]*10,vitesse=width/200+upgrades_joueur["vitesse_balles"]/10,degat=1+upgrades_joueur["degats"])  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
-                roquette=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_roquette,homing=True,portee_detection=width/5+upgrades_joueur["portee"]*10,vitesse=width/300+upgrades_joueur["vitesse_balles"]/10,aoe=True,aoe_rayon=width/20+5*upgrades_joueur["deflagrations"],degat=3+upgrades_joueur["degats"])  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
+                roquette=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_roquette,homing=True,portee_detection=width/5+upgrades_joueur["portee"]*10,vitesse=width/300+upgrades_joueur["vitesse_balles"]/10,aoe=True,aoe_rayon=width/20+5*upgrades_joueur["deflagrations"],degat=3+upgrades_joueur["degats"],degat_AOE=1+upgrades_joueur["degats_aoe"])  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
                 type_armes=[laser,roquette]   ##Liste des types d'armes
                 #Explosion
                 sprite_explosion_roquette=[]
@@ -459,12 +460,9 @@ def lancer_jeu(settings):
                         explosion=Explosion(proj.x,proj.y,sprite_explosion_roquette)
                         liste_explosions.append(explosion)
 
-                        aoe_zone=AOE(proj.x,proj.y,proj.aoe_rayon,proj.degat,333,interval_tick_ms=300,sprite=None)
+                        aoe_zone=AOE(proj.x,proj.y,proj.aoe_rayon,proj.degat_AOE,333,interval_tick_ms=300,sprite=None)
                         liste_aoe.append(aoe_zone)
 
-                        for e in liste_ennemis:
-                            if math.hypot(proj.x-e.x,proj.y-e.y)<=proj.aoe_rayon:
-                                    e.hp-=proj.degat
                     elif hit_ennemi:
                         hit_ennemi.hp-=proj.degat
                     if proj in liste_projectiles:
