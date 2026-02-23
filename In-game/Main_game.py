@@ -18,6 +18,7 @@ laser_sprite=None
 roquette_sprite=None
 sprite_explosion_roquette=None
 enemi_spawn_delay=2000
+offset_x,offset_y=0,0  ##Décalage de la caméra par rapport au centre du monde, utilisé pour dessiner les éléments à l'écran
 # Couleurs (importées de Menu)
 red = (255, 0, 0)
 green = (0, 255, 0)
@@ -26,6 +27,29 @@ blue = (0, 0, 255)
 
 # position de la base (centre du monde) utilisée pour la flèche
 base_x, base_y = 0, 0
+
+def fleche_vers_destination(player_x, player_y, destination_x, destination_y):
+    if destination_x>offset_x+width or destination_x<offset_x or destination_y>offset_y+height or destination_y<offset_y:
+        # Calculer la direction vers la destination
+        direction_x = destination_x - player_x
+        direction_y = destination_y - player_y
+        distance = math.hypot(direction_x, direction_y)
+        # Normaliser la direction
+        dir_x = direction_x / distance if distance > 0 else 0
+        dir_y = direction_y / distance if distance > 0 else 0
+        # Calculer l'angle en radians et convertir en degrés
+        angle_rad = math.atan2(-dir_y, dir_x)  # Inverser dir_y pour corriger l'orientation
+        angle_deg = math.degrees(angle_rad)
+
+        #Dessiner la flèche à l'écran
+        flèche = pygame.Surface((20, 20), pygame.SRCALPHA)
+        pygame.draw.polygon(flèche, (255, 0, 0), [(10, 0), (20, 20), (10, 15), (0, 20)])
+        rotated_flèche = pygame.transform.rotate(flèche, angle_deg-90)
+        flèche_rect = rotated_flèche.get_rect(center=(player_x - offset_x, player_y - offset_y))
+        screen.blit(rotated_flèche, flèche_rect)
+        return angle_deg
+    else:
+        return None  ##Si la destination est à l'écran, on n'affiche pas de flèche
 #Classes
 class ennemi_main:
     """Classe principale des ennemis"""
@@ -78,7 +102,7 @@ class ennemi_main:
         if self.arme and distance <= self.arme.range:   
             if self.arme.tirer():
                 cible=type('Cible',(),{'x':player_x,'y':player_y})()  ##Crée un objet temporaire pour représenter la cible du projectile (pris d'internet car si je recodais une fonction joueur, il aurait fallu que je change tout le code)
-                nouveau_projectile = self.arme.classe(self.x, self.y, self.arme.vitesse, cible, homing=self.arme.homing,range=self.arme.range_balle)
+                nouveau_projectile = self.arme.classe(self.x, self.y, self.arme.vitesse, cible, homing=self.arme.homing,range=self.arme.range_balle,degat=self.arme.degat,aoe=self.arme.aoe,aoe_rayon=self.arme.aoe_rayon,degat_AOE=self.arme.degat_AOE)  ##Crée un nouveau projectile en utilisant la classe de l'arme de l'ennemi
                 liste_projectiles_ennemis.append(nouveau_projectile)
 
     @staticmethod   ##Sert a attribuer une fonction a une classe sans avoir besoin d'instancier un objet
@@ -188,12 +212,12 @@ class projectile_roquette(projectiles_general):
 
 class projectile_ennemi(projectiles_general):
     """Classe des projectiles ennemis"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite_path=None,degat=7,range=10):
-        super().__init__(x,y,vitesse+echelle_difficulte/10,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(0,0,0),degat=degat+echelle_difficulte,range=range)  ##Appelle le constructeur de la classe parente avec une couleur noire
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,degat=7,range=10,aoe=False,aoe_rayon=None,degat_AOE=0):
+        super().__init__(x,y,vitesse+echelle_difficulte/10,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(0,0,0),degat=degat+echelle_difficulte,range=range,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE)  ##Appelle le constructeur de la classe parente avec une couleur noire
 
 class weapon_main:
     """Classe principale des armes"""
-    def __init__(self,delai,classe_projectile,homing=False,portee_detection=None,vitesse=10,aoe=False,aoe_rayon=None,degat=1):
+    def __init__(self,delai,classe_projectile,homing=False,portee_detection=None,vitesse=10,aoe=False,aoe_rayon=None,degat=1,degat_AOE=1):
         if portee_detection is None:
             portee_detection=height/2
         if aoe_rayon is None:
@@ -207,6 +231,8 @@ class weapon_main:
         self.range_balle=portee_detection*2  ##Portée maximale des projectiles tirés
         self.aoe=aoe
         self.degat=degat
+        self.degat_AOE=degat_AOE
+        self.aoe_rayon=aoe_rayon
     def tirer(self):
         if pygame.time.get_ticks() - self.dernier_tir >= self.delai:
             self.dernier_tir = pygame.time.get_ticks()
@@ -282,7 +308,7 @@ class AOE:
             pygame.draw.circle(screen,(255,165,0),(int(self.x-offset_x),int(self.y-offset_y)),self.rayon,2)
 
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite,upgrades_joueur, sprite_explosion_roquette,image_philippe,image_philippe_liste
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite,upgrades_joueur, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay
     for sprite,classe in [('projectile_laser.png',laser_sprite),('projectile_roquette.png',roquette_sprite)]:
         img=pygame.image.load(sprite).convert_alpha()
         img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
@@ -408,6 +434,13 @@ def lancer_jeu(settings):
                     img=pygame.image.load(sprite).convert_alpha()
                     img=pygame.transform.scale(img,(width/10+10*upgrades_joueur["deflagrations"],int(img.get_height()/img.get_width()*(width/10+10*upgrades_joueur["deflagrations"]))))
                     sprite_explosion_roquette.append(img)
+                for sprite,classe in [('projectile_laser.png',laser_sprite),('projectile_roquette.png',roquette_sprite)]:
+                    img=pygame.image.load(sprite).convert_alpha()
+                    img=pygame.transform.scale(img,(width/25+5*upgrades_joueur["taille_projectiles"],int(img.get_height()/img.get_width()*(width/25+5*upgrades_joueur["taille_projectiles"]))))
+                    if classe==laser_sprite:
+                        laser_sprite=img
+                    else:
+                        roquette_sprite=img
                 duree_pause=pygame.time.get_ticks()-temps_debut_pause
                 for classe in derniers_spawn:
                     derniers_spawn[classe]+=duree_pause
@@ -463,8 +496,8 @@ def lancer_jeu(settings):
                         aoe_zone=AOE(proj.x,proj.y,proj.aoe_rayon,proj.degat_AOE,333,interval_tick_ms=300,sprite=None)
                         liste_aoe.append(aoe_zone)
 
-                    elif hit_ennemi:
-                        hit_ennemi.hp-=proj.degat
+                    if hit_ennemi:
+                        hit_ennemi.hp -= proj.degat
                     if proj in liste_projectiles:
                         liste_projectiles.remove(proj)
             for e in liste_ennemis[:]:
@@ -474,22 +507,19 @@ def lancer_jeu(settings):
 
             # Mettre à jour les projectiles des ennemis
             for proj in liste_projectiles_ennemis[:]:
-                proj.update([],player_pos=(player_x,player_y))
+                proj.update([], player_pos=(player_x, player_y))
                 if proj.rect.colliderect(player_real_rect):
                     liste_projectiles_ennemis.remove(proj)
                     pv_joueur -= proj.degat
                     Soundhit.play()
                 elif proj.est_trop_loin():
+                    if proj.aoe:  # <-- add this
+                        explosion = Explosion(proj.x, proj.y, sprite_explosion_roquette)
+                        liste_explosions.append(explosion)
+                        aoe_zone = AOE(proj.x, proj.y, proj.aoe_rayon, proj.degat_AOE, 333, interval_tick_ms=300)
+                        liste_aoe.append(aoe_zone)
                     if proj in liste_projectiles_ennemis:
                         liste_projectiles_ennemis.remove(proj)
-            #Gerer collisions ennemis-joueur
-            for ennemi in liste_ennemis[:]:
-                if ennemi.rect.colliderect(player_real_rect):
-                    liste_ennemis.remove(ennemi)
-                    pv_joueur -= ennemi.degat
-                    Soundhit.play()
-            if pv_joueur <= 0:
-                en_jeu = False  ##Le joueur a perdu
             #Gerer les AOE
             for aoe in liste_aoe[:]:
                 aoe.update(liste_ennemis)
@@ -573,7 +603,7 @@ def lancer_jeu(settings):
         texte_niveau_rect=texte_niveau.get_rect(topleft=(width/150,height/20))
         screen.blit(texte_niveau,texte_niveau_rect)
 
-        
+        fleche_vers_destination(player_x,player_y,0,0)
         pygame.display.flip()
 
 
