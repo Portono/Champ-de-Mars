@@ -15,9 +15,10 @@ dico_upgrades={
                 "degats":0,         ##fait
                 "portee":0,         ##fait
                 "regen_pv":0,       ##fait
-                "degats_aoe":0,
+                "degats_aoe":0,     ##fait
                 "vol_de_vie":0,
-                "taille_projectiles":0,
+                "taille_projectiles":0,##fait
+                "duree_aoe":0,
                 "multishot":0,
                 "deflagrations":0,  ##fait
                 "esquive":0,
@@ -41,6 +42,7 @@ dico_rarete_upgrades={
                 "cadence_de_tir":"commun",
                 "gain_xp":"commun",
                 "degats_aoe":"rare",
+                "duree_aoe":"rare",
                 "regen_pv":"rare",
                 "taille_projectiles":"rare",
                 "aoe_joueur":"rare",
@@ -68,6 +70,7 @@ dico_poids_upgrade={
                 "portee":0,
                 "regen_pv":0,
                 "degats_aoe":0,
+                "duree_aoe":0,
                 "vol_de_vie":0,
                 "taille_projectiles":0,
                 "multishot":0,
