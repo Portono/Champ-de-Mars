@@ -16,7 +16,7 @@ dico_upgrades={
                 "portee":0,         ##fait
                 "regen_pv":0,       ##fait
                 "degats_aoe":0,     ##fait
-                "vol_de_vie":0,
+                "vol_de_vie":0,     ##fait
                 "taille_projectiles":0,##fait
                 "duree_aoe":0,
                 "multishot":0,
