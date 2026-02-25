@@ -47,55 +47,51 @@ def fleche_vers_destination(player_x, player_y, destination_x, destination_y):
                                         arrow_y - arrow_size * math.sin(angle + math.pi / 6))])
     return
 
-def dessiner_map(screen, map_data, sprite_sheets, offset_x, offset_y):
-    zoom = 2
-    tile_size = map_data.get("tileSize", 32)
-    display_size = int(tile_size * zoom)
+def dessiner_map(screen, map_data, sprite_sheets, offset_x, offset_y, origin_x, origin_y):
+    zoom = 5
+    tile_size = 16
+    # ASTUCE 1 : On ajoute 1 pixel de "débordement" pour boucher les fissures
+    display_size = (tile_size * zoom) + 1 
     sw, sh = screen.get_size()
+    mid_sw, mid_sh = sw // 2, sh // 2
 
-    # 1. RÉCUPÉRATION ET CALIBRAGE INITIAL
-    layers = map_data.get("layers", [])
-    all_tiles = []
-    for layer in layers:
-        tiles = layer.get("tiles", []) or layer.get("base", {}).get("tiles", [])
-        if tiles:
-            all_tiles.extend(tiles)
+    for layer in map_data.get("layers", []):
+        tiles = layer.get("tiles")
+        if not tiles:
+            data_interne = layer.get("base") or layer.get("Base")
+            if data_interne:
+                tiles = data_interne.get("tiles")
+        
+        if not tiles: continue
 
-    if not all_tiles:
-        return
-
-    # ON FORCE LE RECALIBRAGE SUR LA PREMIÈRE TUILE EXISTANTE
-    # Cela annule n'importe quel décalage venant du fichier JSON
-    origin_x = all_tiles[0]["x"]
-    origin_y = all_tiles[0]["y"]
-
-    # 2. DESSIN
-    for layer in layers:
-        tiles = layer.get("tiles", []) or layer.get("base", {}).get("tiles", [])
         for tile in tiles:
-            # On soustrait l'origine pour que la map commence à (0,0)
-            # Ensuite on applique l'offset et le zoom
+            try:
+                t_id = int(tile.get("id", -1))
+            except:
+                t_id = -1
+            if t_id == -1: continue
+
+            # ASTUCE 2 : On arrondit le calcul AVANT de transformer en entier
+            # On utilise round() pour éviter les sauts de pixels
+            # Position de la tuile dans le monde
             wx = (tile["x"] - origin_x) * zoom
             wy = (tile["y"] - origin_y) * zoom
-            
-            # Position écran (Joueur au centre)
-            x = int(wx - offset_x + (sw // 2))
-            y = int(wy - offset_y + (sh // 2))
+
+            # Position sur l'écran : (Position Monde) - (Position Caméra) + (Milieu Écran)
+            x = int(wx - offset_x + mid_sw)
+            y = int(wy - offset_y + mid_sh)
 
             if -display_size < x < sw and -display_size < y < sh:
                 s_id = str(tile.get("spriteSheetId", ""))
                 if s_id in sprite_sheets:
                     sheet = sprite_sheets[s_id]
-                    t_id = int(tile.get("id", 0))
-                    
-                    # Fix des colonnes pour éviter l'effet "portes"
                     cols = sheet.get_width() // tile_size
                     if cols > 0:
                         sx = (t_id % cols) * tile_size
                         sy = (t_id // cols) * tile_size
                         
-                        source_rect = (sx, sy, tile_size, tile_size)
-                        img = sheet.subsurface(source_rect)
+                        img = sheet.subsurface((sx, sy, tile_size, tile_size))
+                        # ASTUCE 3 : On scale avec le display_size augmenté de 1px
                         img = pygame.transform.scale(img, (display_size, display_size))
                         screen.blit(img, (x, y))
 
@@ -404,6 +400,17 @@ def lancer_jeu(settings):
         # On utilise str(sheet_id) pour être sûr que la clé correspond au JSON
         sprite_sheets[str(sheet_id)] = image_chargee
     
+    # --- CALCUL DE L'ORIGINE POUR LE CENTRAGE ---
+    origin_x, origin_y = 0, 0
+    layers = map_data.get("layers", [])
+    for layer in layers:
+        # On cherche dans "tiles" ou dans le dictionnaire "Base"
+        tiles = layer.get("tiles") or (layer.get("Base") and layer.get("Base").get("tiles"))
+        if tiles:
+            origin_x = tiles[0]["x"]
+            origin_y = tiles[0]["y"]
+            break # On a trouvé notre point de repère
+
     for sprite,classe in [('projectile_laser.png',laser_sprite),('projectile_roquette.png',roquette_sprite)]:
         img=pygame.image.load(sprite).convert_alpha()
         img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
@@ -548,7 +555,7 @@ def lancer_jeu(settings):
                         ennemi.arme.compenser_pause(duree_pause)  ##Décale les temps de tir des armes des ennemis pour compenser la pause
             #Map??
             screen.fill(white)
-            dessiner_map(screen, map_data, sprite_sheets, offset_x, offset_y)
+            dessiner_map(screen, map_data, sprite_sheets, offset_x, offset_y,origin_x,origin_y)
 
             # Gérer le spawn des ennemis
             for classe in types_ennemis:
