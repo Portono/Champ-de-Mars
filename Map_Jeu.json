@@ -2,7 +2,7 @@
   "id": "tutorial",
   "name": "Map",
   "description": "Map for Champ de Mars",
-  "tileSize": 128,
+  "tileSize": 16,
   "spriteSheets": {
     "d14df962-1918-4c91-a3b4-55a426452ad5": {
       "base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAf0lEQVR4AaTSTQ5AMBCG4VEWgtQxHM9N3UWDWJDqzIKU/kxL8glJ32dVMY2D/jMB5lm2A3JmUiAAP9peAXd1oTCh3QD9MV6naUv5HEwC3jEybMAVswFfzAJCcRSIxUGAE3sBbuwEUuIPkBpbQE5sAbuWsM78YYyjm9g1FeQMgQsAAP//ecrqUQAAAAZJREFUAwBR0opRlt7zVAAAAABJRU5ErkJggg==",
