@@ -431,7 +431,7 @@ def lancer_jeu(settings):
     liste_projectiles = []  ##Liste pour stocker les projectiles
     laser=weapon_main(500, projectile_laser,homing=False,portee_detection=height/5,vitesse=width/200,interval_tick_ms=500)  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
     roquette=weapon_main(10000, projectile_roquette,homing=True,portee_detection=width/5,vitesse=width/300,aoe=True,aoe_rayon=width/10,duree_AOE=333,interval_tick_ms=500)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
-    mine=weapon_main(5000, projectile_mine,homing=False,portee_detection=math.inf,vitesse=0,aoe=True,aoe_rayon=width/10,duree_AOE=5000,duree=10000,degat_AOE=1,interval_tick_ms=500)  ##Crée une arme mine avec un délai de 1500ms entre chaque tir et des projectiles non homing
+    mine=weapon_main(5000, projectile_mine,homing=False,portee_detection=math.inf,vitesse=0,aoe=True,aoe_rayon=width/20,duree_AOE=2500,duree=10000,degat_AOE=1,interval_tick_ms=500,degat=2)  ##Crée une arme mine avec un délai de 1500ms entre chaque tir et des projectiles non homing
     type_armes=[laser,roquette,mine]   ##Liste des types d'armes
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
     liste_explosions=[]
@@ -511,10 +511,10 @@ def lancer_jeu(settings):
                 pv_max_joueur=100+(upgrades_joueur["pv"])*10
                 if ancien_pv_max > 0:
                     pv_joueur = int(pv_joueur * (pv_max_joueur / ancien_pv_max))
-                vitesse_joueur=width/300+(upgrades_joueur["vitesse"])*width/900
+                vitesse_joueur=width/300+(upgrades_joueur["vitesse"])*width/1200
                 laser=weapon_main(500/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_laser,homing=False,portee_detection=width/10+upgrades_joueur["portee"]*10,vitesse=width/200+upgrades_joueur["vitesse_balles"]/10,degat=1+upgrades_joueur["degats"],interval_tick_ms=500)  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
                 roquette=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_roquette,homing=True,portee_detection=width/5+upgrades_joueur["portee"]*10,vitesse=width/300+upgrades_joueur["vitesse_balles"]/10,aoe=True,aoe_rayon=width/20+5*upgrades_joueur["deflagrations"],degat=3+upgrades_joueur["degats"],degat_AOE=1+upgrades_joueur["degats_aoe"],duree_AOE=333,interval_tick_ms=500)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
-                mine=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_mine,homing=False,portee_detection=width/5+upgrades_joueur["portee"]*10,vitesse=0,aoe=True,aoe_rayon=width/20+5*upgrades_joueur["deflagrations"],degat=3+upgrades_joueur["degats"],degat_AOE=1+upgrades_joueur["degats_aoe"],duree_AOE=333+upgrades_joueur["duree_aoe"]*100,interval_tick_ms=500)  ##Crée une arme mine avec un délai de 1500ms entre chaque tir et des projectiles homing
+                mine=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_mine,homing=False,portee_detection=math.inf,vitesse=0,aoe=True,aoe_rayon=width/20+5*upgrades_joueur["deflagrations"],degat=2+upgrades_joueur["degats"],degat_AOE=1+upgrades_joueur["degats_aoe"],duree_AOE=2500+upgrades_joueur["duree_aoe"]*100,interval_tick_ms=500,duree=10000)  ##Crée une arme mine avec un délai de 1500ms entre chaque tir et des projectiles homing
                 armes=[laser,roquette,mine]
                 #Explosion
                 sprite_explosion_roquette=[]
@@ -636,6 +636,7 @@ def lancer_jeu(settings):
                 # 2. APPLIQUER DEGATS ET RECUPERER XP
                 if hit_ennemi:
                     # On capture si l'ennemi est mort (nécessite le 'return True' dans prendre_degats)
+                    pv_joueur=min(pv_joueur+upgrades_joueur["vol_de_vie"],pv_max_joueur)  ##Vol de vie
                     mort = hit_ennemi.prendre_degats(proj.degat)
                     
                     if mort:
