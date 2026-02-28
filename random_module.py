@@ -9,16 +9,16 @@ dico_upgrades={
                 "chance":1,         ##fait
                 "gain_xp":0,        ##fait
                 "pv":0,             ##fait
-                "vitesse":0,        ##fait
+                "vitesse":1,        ##fait
                 "vitesse_balles":0, ##fait
                 "cadence_de_tir":0, ##fait
                 "degats":0,         ##fait
                 "portee":0,         ##fait
                 "regen_pv":0,       ##fait
                 "degats_aoe":0,     ##fait
-                "vol_de_vie":0,     ##fait
+                "vol_de_vie":0,
                 "taille_projectiles":0,##fait
-                "duree_aoe":0,      ##fait
+                "duree_aoe":0,
                 "multishot":0,
                 "deflagrations":0,  ##fait
                 "esquive":0,
@@ -26,7 +26,6 @@ dico_upgrades={
                 "perforation":0,
                 "arc_degats":0,
                 "tirs_ralentissants":0,
-                "aoe_joueur":0,
                 "resistance":0,
                 "summon_allies":0,
                 "distance_damage":0,
@@ -45,7 +44,6 @@ dico_rarete_upgrades={
                 "duree_aoe":"rare",
                 "regen_pv":"rare",
                 "taille_projectiles":"rare",
-                "aoe_joueur":"rare",
                 "resistance":"rare",
                 "deflagrations":"rare",
                 "vol_de_vie":"epique",
@@ -80,7 +78,6 @@ dico_poids_upgrade={
                 "perforation":0,
                 "arc_degats":0,
                 "tirs_ralentissants":0,
-                "aoe_joueur":0,
                 "resistance":0,
                 "summon_allies":0,
                 "distance_damage":0,
@@ -90,28 +87,29 @@ def get_coef_rarete(upgrade):
     table_rarete={"commun":9,"rare":6,"epique":3,"legendaire":1}
     return table_rarete.get(dico_rarete_upgrades[upgrade],1)
 
-def random_upgrade():
-    total_points=sum(v for k,v in dico_upgrades.items() if k!="chance")
-    multipl_rarete=dico_upgrades["chance"]
-    for upgrade in dico_upgrades:
+def random_upgrade(dico_cible):
+    total_points=sum(v for k,v in dico_cible.items() if k!="chance")
+    multipl_rarete=dico_cible["chance"]
+    poids_resultat={}
+    for upgrade in dico_cible:
         if upgrade=="chance":
-            dico_poids_upgrade[upgrade]=1
+            poids_resultat[upgrade]=1
             continue
         r=get_coef_rarete(upgrade)
         if total_points>0:
-            ratio=dico_upgrades[upgrade]/total_points
+            ratio=dico_cible[upgrade]/total_points
             malus=(ratio/multipl_rarete)
             poids=r*(1-malus)
         else:
             poids=r
-        dico_poids_upgrade[upgrade]=max(0,poids)
-    return dico_poids_upgrade
+        poids_resultat[upgrade]=max(0,poids)
+    return poids_resultat
 
-def choisir_upgrades():
-    random_upgrade()
+def choisir_upgrades(dico_cible,nb_options=3):
+    poids_resultat=random_upgrade(dico_cible)
     options=[]
-    poids_temp=dico_poids_upgrade.copy()
-    for _ in range(3):
+    poids_temp=poids_resultat.copy()
+    for _ in range(nb_options):
         noms=list(poids_temp.keys())
         poids=list(poids_temp.values())
         if sum(poids)==0:
@@ -121,22 +119,32 @@ def choisir_upgrades():
         poids_temp[choix]=0
     return options
 
-def level_up(screen,width,height):
-    global dico_upgrades
-    clock=pygame.time.Clock()
-    font=pygame.font.Font(None,int(height*0.05))
-    upgrading=True
-    options=choisir_upgrades()
-    while upgrading:
+def level_up(screen, width, height, cible):
+    # Initialisation...
+    clock = pygame.time.Clock()
+    font = pygame.font.Font(None, int(height*0.05))
+    
+    # DÉTERMINER LES OPTIONS
+    if isinstance(cible, list):
+        options = cible  # On utilise directement la liste d'armes bloquées
+    else:
+        options = choisir_upgrades(cible) # On utilise ta logique de poids/rarete
+        
+    while True:
+        # Gestion des événements et dessin (ton code actuel)...
+        
         for event in pygame.event.get():
-            if event.type==pygame.QUIT:
-                pygame.quit()
-                exit()
-            if event.type==pygame.MOUSEBUTTONDOWN:
-                for i,rect in enumerate(rects):
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for i, rect in enumerate(rects):
                     if rect.collidepoint(event.pos):
-                        dico_upgrades[options[i]]+=1
-                        return dico_upgrades
+                        choix = options[i]
+                        
+                        # LOGIQUE DE RETOUR
+                        if isinstance(cible, list):
+                            return choix # On renvoie juste le nom de l'arme ("roquette")
+                        else:
+                            cible[choix] += 1 # On incrémente la stat dans le dico
+                            return cible
 
         screen.fill((255,255,255))
 
@@ -156,6 +164,9 @@ def level_up(screen,width,height):
         pygame.display.flip()
         clock.tick(60)
 
-
-
+def choisir_nouvelle_arme(dico_armes,nb_options=3):
+    armes_disponibles=[nom for nom, niveau in dico_armes.items() if niveau==0]
+    n=min(len(armes_disponibles),nb_options)
+    if n>0:
+        return random.sample(armes_disponibles, n)
 
