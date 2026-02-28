@@ -339,6 +339,47 @@ class AOE:
         else:
             pygame.draw.circle(screen,(255,165,0),(int(self.x-offset_x),int(self.y-offset_y)),self.rayon,2)
 
+class aura:
+    def __init__(self, rayon, degat, sprite=None, interval_tick_ms=500):
+        self.rayon = rayon
+        self.degat = degat
+        self.sprite = sprite
+        self.interval_tick = interval_tick_ms
+        self.dernier_tick = 0
+
+    def update(self, player_x, player_y, liste_ennemis, xp_callback=None):
+        maintenant = pygame.time.get_ticks()
+        
+        # On ne déclenche les dégâts que si le délai est passé
+        if maintenant - self.dernier_tick >= self.interval_tick:
+            # On boucle sur une copie de la liste pour éviter les erreurs de suppression
+            for ennemi in liste_ennemis[:]: 
+                distance = math.hypot(player_x - ennemi.x, player_y - ennemi.y)
+                if distance <= self.rayon:
+                    # On inflige les dégâts
+                    mort = ennemi.prendre_degats(self.degat)
+                    # Si l'ennemi meurt, on appelle le callback pour l'XP
+                    if mort and xp_callback:
+                        xp_callback(ennemi.xp)
+            
+            self.dernier_tick = maintenant
+
+    def dessiner(self, screen, player_x, player_y, offset_x, offset_y):
+        # Position à l'écran
+        pos_ecran = (int(player_x - offset_x), int(player_y - offset_y))
+        
+        if self.sprite is not None:
+            taille = int(self.rayon * 2)
+            sprite_redim = pygame.transform.scale(self.sprite, (taille, taille))
+            rect = sprite_redim.get_rect(center=pos_ecran)
+            screen.blit(sprite_redim, rect)
+        else:
+            # Dessin d'un cercle violet transparent (SRCALPHA)
+            surface_aura = pygame.Surface((self.rayon*2, self.rayon*2), pygame.SRCALPHA)
+            # Couleur violette avec 80/255 d'opacité
+            pygame.draw.circle(surface_aura, (255, 0, 255, 80), (self.rayon, self.rayon), self.rayon)
+            screen.blit(surface_aura, (pos_ecran[0] - self.rayon, pos_ecran[1] - self.rayon))
+
 def lancer_jeu(settings):
     global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite,upgrades_joueur, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x
     player_x,player_y=0,0
@@ -435,6 +476,7 @@ def lancer_jeu(settings):
     type_armes=[laser,roquette,mine]   ##Liste des types d'armes
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
     liste_explosions=[]
+    aura_active=aura(width/10,1,sprite=None,interval_tick_ms=500)  ##Crée une aura qui inflige des dégâts aux ennemis à proximité toutes les 500ms
     pv_joueur=100  ##Points de vie du joueur
     pv_max_joueur=100
     pygame.mixer.music.stop()
@@ -515,6 +557,9 @@ def lancer_jeu(settings):
                 laser=weapon_main(500/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_laser,homing=False,portee_detection=width/10+upgrades_joueur["portee"]*10,vitesse=width/200+upgrades_joueur["vitesse_balles"]/10,degat=1+upgrades_joueur["degats"],interval_tick_ms=500)  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
                 roquette=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_roquette,homing=True,portee_detection=width/5+upgrades_joueur["portee"]*10,vitesse=width/300+upgrades_joueur["vitesse_balles"]/10,aoe=True,aoe_rayon=width/20+5*upgrades_joueur["deflagrations"],degat=3+upgrades_joueur["degats"],degat_AOE=1+upgrades_joueur["degats_aoe"],duree_AOE=333,interval_tick_ms=500)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
                 mine=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_mine,homing=False,portee_detection=math.inf,vitesse=0,aoe=True,aoe_rayon=width/20+5*upgrades_joueur["deflagrations"],degat=2+upgrades_joueur["degats"],degat_AOE=1+upgrades_joueur["degats_aoe"],duree_AOE=2500+upgrades_joueur["duree_aoe"]*100,interval_tick_ms=500,duree=10000)  ##Crée une arme mine avec un délai de 1500ms entre chaque tir et des projectiles homing
+                aura_active.rayon=width/10+5*upgrades_joueur["portee"]
+                aura_active.degat=1+upgrades_joueur["degats_aoe"]
+                aura_active.interval_tick=500/(1+upgrades_joueur["cadence_de_tir"]/10)
                 armes=[laser,roquette,mine]
                 #Explosion
                 sprite_explosion_roquette=[]
@@ -663,6 +708,8 @@ def lancer_jeu(settings):
                     if proj in liste_projectiles:
                         liste_projectiles.remove(proj)
 
+            aura_active.update(player_x, player_y, liste_ennemis, xp_callback=lambda xp_gagne: globals().update(xp=xp + xp_gagne))
+            aura_active.dessiner(screen, player_x, player_y, offset_x, offset_y)
             # Mettre à jour les projectiles des ennemis
             for proj in liste_projectiles_ennemis[:]:
                 proj.update([], player_pos=(player_x, player_y))
