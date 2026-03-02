@@ -6,4 +6,6 @@ Il faut aussi les bibliotheques:
   -pygame  
   -math  
   -random  
-  -pygame_widgets(pas encore mais dans le futur surement)
+  -pygame_widgets(pas encore mais dans le futur surement)  
+
+Futurs idees, l'airstrike finit instant les enemis avec 8% ou moins de pv
