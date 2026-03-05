@@ -1,63 +1,48 @@
-SAVE_FILE = "savegame.json"
+import json
+import os
 
-
-def sauvegarder_partie():
-    global nombre_journees, niveau, xp, xp_for_level
-    global player_x, player_y, pv_joueur, pv_max_joueur
-    global upgrades_joueur, type_armes
-
+def sauvegarder_jeu():
     data = {
-        "nombre_journees": nombre_journees,
-        "niveau": niveau,
+        "pv_joueur": pv_joueur,
         "xp": xp,
-        "xp_for_level": xp_for_level,
+        "niveau": niveau,
         "player_x": player_x,
         "player_y": player_y,
-        "pv_joueur": pv_joueur,
-        "pv_max_joueur": pv_max_joueur,
-        "upgrades_joueur": upgrades_joueur,
-        "armes_debloquees": [arme.classe.__name__ if hasattr(arme, "classe") else "aura" for arme in type_armes]
+        "nombre_journees": nombre_journees,
+        "duree_journee": duree_journee,
+        "armes": type_armes
     }
 
-    with open(SAVE_FILE, "w") as f:
-        json.dump(data, f)
+    with open("save.json", "w") as fichier:
+        json.dump(data, fichier, indent=4)
 
-    print("Partie sauvegardée !")
+    print("Jeu sauvegardé !")
+    
+    
+    
+    
+    def charger_jeu():
+    global pv_joueur, xp, niveau
+    global player_x, player_y
+    global nombre_journees, duree_journee
+    global type_armes
 
+    if os.path.exists("save.json"):
+        with open("save.json", "r") as fichier:
+            data = json.load(fichier)
 
-def charger_partie():
-    global nombre_journees, niveau, xp, xp_for_level
-    global player_x, player_y, pv_joueur, pv_max_joueur
-    global upgrades_joueur, type_armes
-    global laser, roquette, mine, aura_active
+        pv_joueur = data.get("pv_joueur", 100)
+        xp = data.get("xp", 0)
+        niveau = data.get("niveau", 1)
 
-    try:
-        with open(SAVE_FILE, "r") as f:
-            data = json.load(f)
+        player_x = data.get("player_x", width // 2)
+        player_y = data.get("player_y", height // 2)
 
-        nombre_journees = data["nombre_journees"]
-        niveau = data["niveau"]
-        xp = data["xp"]
-        xp_for_level = data["xp_for_level"]
-        player_x = data["player_x"]
-        player_y = data["player_y"]
-        pv_joueur = data["pv_joueur"]
-        pv_max_joueur = data["pv_max_joueur"]
-        upgrades_joueur = data["upgrades_joueur"]
+        nombre_journees = data.get("nombre_journees", 0)
+        duree_journee = data.get("duree_journee", 0)
 
-        type_armes.clear()
+        type_armes = data.get("armes", [])
 
-        for arme_nom in data["armes_debloquees"]:
-            if arme_nom == "projectile_laser":
-                type_armes.append(laser)
-            elif arme_nom == "projectile_roquette":
-                type_armes.append(roquette)
-            elif arme_nom == "projectile_mine":
-                type_armes.append(mine)
-            elif arme_nom == "aura":
-                type_armes.append(aura_active)
-
-        print("Partie chargée !")
-
-    except FileNotFoundError:
+        print("Sauvegarde chargée !")
+    else:
         print("Aucune sauvegarde trouvée.")
