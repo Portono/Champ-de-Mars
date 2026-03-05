@@ -1,5 +1,4 @@
 import pygame
-import save_load
 
 pygame.init()
 
@@ -32,6 +31,7 @@ gray=(128,128,128)
 
 #Predeffinission de la police et de la couleur des boutons
 menu_font=pygame.font.Font("font.ttf", int(height*0.05)) ##Definition de la police et de la taille du texte des boutons
+font=pygame.font.Font(None,int(width/50))
 button_color=black
 hover_color=gray
 text_color=orange
@@ -78,6 +78,7 @@ def refresh_ui():
         screen=pygame.display.set_mode((width,height), pygame.FULLSCREEN)
     elif fullscreen==False:
         screen=pygame.display.set_mode((width,height))
+    font=pygame.font.Font(None,int(width/50))
     #Repositionnement du logo
     logo=pygame.transform.smoothscale(logo_import,(width,int(logo_import_height/logo_import_width*width)))
     #Repositionnement des boutons
@@ -142,8 +143,7 @@ def boucle_menu(pause=False):
                         play=True
                     if settings_button_rect.collidepoint(mouse_pos):   ##Si le bouton Settings est appuye
                         current_menu=menu_settings
-                    if quit_button_rect.collidepoint(mouse_pos) and pause:
-                        sauvegarder_jeu()
+                    if quit_button_rect.collidepoint(mouse_pos):
                         pygame.quit()       ##Quitte pygame
                         exit()      ##Quitte le programme
                     if astropedia_button_rect.collidepoint(mouse_pos):
@@ -226,7 +226,7 @@ def boucle_menu(pause=False):
                 texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
                 screen.blit(texte_surface, texte_rect)  ##Affichage du texte
         if current_menu==menu_astropedia:
-            astropedia_text=menu_font.render("   Nettoyeur haute-pression thermisque MNT215",True,black)
+            astropedia_text=font.render("     Nettoyeur haute pression thermique MNT215",True,black)
             astropedia_text_rect=astropedia_text.get_rect(topleft=(0,0))
             screen.blit(astropedia_text,astropedia_text_rect)
             for rect,texte in [(goback_button_rect,"Retour")]:
@@ -245,8 +245,6 @@ def boucle_menu(pause=False):
             refresh_ui()
         pygame.display.flip()
     return {"width": width, "height": height, "fullscreen": fullscreen, "play": play}
-
-
 
 
 
