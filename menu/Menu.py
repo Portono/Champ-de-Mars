@@ -163,6 +163,8 @@ def boucle_menu(pause=False):
                         height_button_text="Hauteur"
                         user_height_input=""
                 elif current_menu==menu_astropedia:
+                    if goback_button_rect.collidepoint(mouse_pos):
+                        current_menu=menu_main
                     pass						##TEMPORAIRE
 
             ##Changement de la resolution via l'input utilisateur
@@ -222,9 +224,18 @@ def boucle_menu(pause=False):
                 texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
                 screen.blit(texte_surface, texte_rect)  ##Affichage du texte
         if current_menu==menu_astropedia:
-            astropedia_text=menu_font.render("coucou",True,black)
-            astropedia_text_rect=astropedia_text.get_rect(center=(width//2,height//2))
+            astropedia_text=menu_font.render("   Nettoyeur haute-pression thermisque MNT215",True,black)
+            astropedia_text_rect=astropedia_text.get_rect(topleft=(0,0))
             screen.blit(astropedia_text,astropedia_text_rect)
+            for rect,texte in [(goback_button_rect,"Retour")]:
+                if rect.collidepoint(mouse_pos):    ##Si la souris est au dessus du bouton
+                    button_color=hover_color
+                else:
+                    button_color=black
+                pygame.draw.rect(screen,button_color,goback_button_rect,border_radius=100)
+                texte_surface=menu_font.render(texte,True,orange)    ##Creation du texte
+                texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
+                screen.blit(texte_surface, texte_rect)
         #Toggle du fullscreen
         if fullscreen_change==True or resolution_change==True:
             fullscreen_change=False
@@ -232,6 +243,7 @@ def boucle_menu(pause=False):
             refresh_ui()
         pygame.display.flip()
     return {"width": width, "height": height, "fullscreen": fullscreen, "play": play}
+
 
 
 
