@@ -738,12 +738,19 @@ def lancer_jeu(settings):
     tourelle_active=tourelle(0,0,sprite_batiment=tourelle_sprites,sprite_balle=projectile_tourelle_sprite,vitesse_animation=0.1)  ##Crée une tourelle qui tire des projectiles de tourelle
     type_armes=["stats",laser,roquette]   ##Liste des types d'armes
     liste_armes=[laser,roquette,mine,aura_active,tourelle_active]   ##Liste des armes du joueur, utilisée pour le level up
-    armes_posedees=["stats"]+(["laser"] if laser in type_armes else [])+(["roquette"] if roquette in type_armes else []+(["mine"] if mine in type_armes else [])+(["aura"] if aura_active in type_armes else [])+(["tourelle"] if tourelle_active in type_armes else []))
+    armes_possedees=["stats"]+(["laser"] if laser in type_armes else [])+(["roquette"] if roquette in type_armes else []+(["mine"] if mine in type_armes else [])+(["aura"] if aura_active in type_armes else [])+(["tourelle"] if tourelle_active in type_armes else []))
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
     liste_explosions=[]
     mines_actuelles=[]  ##Liste pour stocker les mines posées par le joueur
     liste_tourelles=[]  ##Liste pour stocker les tourelles posées par le joueur
-    pv_joueur=100  ##Points de vie du joueur
+    armes_dict = {
+    "laser": laser,
+    "roquette": roquette,
+    "mine": mine,
+    "aura": aura_active,
+    "tourelle": tourelle_active
+    }
+    pv_joueur=300  ##Points de vie du joueur
     pv_max_joueur=100
     pygame.mixer.music.stop()
     xp=0
@@ -751,7 +758,7 @@ def lancer_jeu(settings):
     niveau=0
     pv_heal_cooldown=0
     duree_journee=0
-    nombre_journees=0
+    nombre_journees=5
     dernier_soin=pygame.time.get_ticks()
     maintenant=0
     liste_aoe=[]
@@ -796,9 +803,15 @@ def lancer_jeu(settings):
             if touches[pygame.K_z] or touches[pygame.K_w]:
                 player_y -= vitesse_joueur
             if touches[pygame.K_e] and niveau>=1:
-                temps_debut_pause=pygame.time.get_ticks()
-                afficher_upgrades(screen,width,height,3,armes_posedees,font)
+                temps_debut_pause = pygame.time.get_ticks()
 
+                if nombre_journees >= 5:
+                    arme_nom, stat = afficher_upgrades(screen,width,height,3,armes_possedees,font,nouvelle_arme=True)
+                    type_armes.append(armes_dict[arme_nom])
+
+                for _ in range(niveau):
+                    afficher_upgrades(screen,width,height,3,armes_possedees,font)
+                    niveau -= 1
                 duree_pause=pygame.time.get_ticks()-temps_debut_pause
                 for armes in type_armes:
                     if hasattr(armes,"compenser_pause"):
@@ -1002,7 +1015,6 @@ def lancer_jeu(settings):
                 # Si le projectile a eu un impact, créer explosion / AOE et le retirer
                 if impact:
                     if proj.aoe:
-                        print("Explosion créée", proj.sprite_explosion)
                         explosion = Explosion(proj.x, proj.y, proj.sprite_explosion)
                         liste_explosions.append(explosion)
                         aoe_zone = AOE(
