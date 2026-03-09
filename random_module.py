@@ -13,7 +13,7 @@ dico_upgrades_stats={
                 "regen_pv":0,           
                 "vol_de_vie":0,  
                 "esquive":0,
-                "renvoi":0,
+                "renvoi":0
                 }
 
 #------------------Upgrades armes uniques----------------------------------------
@@ -54,13 +54,17 @@ dico_upgrades_roquette={
                 "taille_projectile":0,
                 "vitesse_balles":0,
                 "portee":0,
+                "rayon_aoe":0,
+                "duree_aoe":0
                 }
 #------------------Upgrades stats mine------------------------------------------
 dico_upgrades_mine={
                 "cadence_de_tir":0,
                 "degat":0,
                 "taille_projectile":0,
-                "portee":0
+                "rayon_aoe":0,
+                "duree_aoe":0,
+                "duree_vie":0
                 }
 #------------------Upgrades stats aura------------------------------------------
 dico_upgrades_aura={
@@ -90,7 +94,7 @@ master_dico = {
 }
 
 
-def random_upgrade(nb_upgrades=3, armes_possedees=["stats", "laser","roquette"]):
+def random_upgrade(nb_upgrades=3, armes_possedees=["stats", "laser"]):
     liste_upgrades = []
     type_upgrade = random.randint(0, 10)
 
@@ -157,8 +161,23 @@ def afficher_upgrades(screen, width, height, nb_upgrades, armes_possedees, font,
                 exit()
             
             if event.type == pygame.MOUSEBUTTONDOWN:
+                # Calcul de l'index du bouton cliqué
                 index_clique = int((event.pos[0] - marge_ecran) // (r_width + marge_entre))
+                
                 if 0 <= index_clique < nb_u:
+                    arme_choisie, stat_choisie = liste_upgrades[index_clique]
+                    
+                    # Cas 1 : C'est une nouvelle arme (on l'ajoute à la liste du joueur)
+                    if stat_choisie == "nouvelle arme":
+                        armes_possedees.append(arme_choisie)
+                    
+                    # Cas 2 : C'est une upgrade de stat classique
+                    elif arme_choisie in master_dico:
+                        master_dico[arme_choisie][stat_choisie] += 1
+                        
+                    # Cas 3 : C'est une upgrade unique (True/False)
+                    elif arme_choisie in dico_upgrades_uniques:
+                         dico_upgrades_uniques[arme_choisie][stat_choisie] = True
                     return liste_upgrades[index_clique]
 
         souris_x, souris_y = pygame.mouse.get_pos()
@@ -193,6 +212,7 @@ def afficher_upgrades(screen, width, height, nb_upgrades, armes_possedees, font,
             screen.blit(txt_stat, txt_stat.get_rect(center=(centro_x, rect_scaled.y + 2*rect_scaled.height/3)))
 
         pygame.display.flip()
+
 
 
 
