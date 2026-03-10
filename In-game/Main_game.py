@@ -43,7 +43,9 @@ green = (0, 255, 0)
 black = (0, 0, 0)
 blue = (0, 0, 255)
 
-
+def ajouter_xp(g):
+    global xp
+    xp+=g
 def fleche_vers_destination(player_x, player_y, destination_x, destination_y):
     if destination_x>offset_x+width or destination_x<offset_x or destination_y>offset_y+height or destination_y<offset_y:
         angle = math.atan2(destination_y - player_y, destination_x - player_x)
@@ -65,13 +67,17 @@ class ennemi_main:
     def __init__(self,x,y,vitesse=1,hp=1,arme=None,xp=0,sprite=None,vitesse_animation=0.15,taille_hitbox=[50,50], degat=10): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
         self.x=x	##Coordonnees reelles de l'ennemi
         self.y=y	##Coordonnees reelles de l'ennemi
-        self.vitesse=vitesse+echelle_difficulte/10    ##Vitesse de deplacement de l'ennemi
+        self.vitesse_base=vitesse+echelle_difficulte/10
+        self.vitesse=self.vitesse_base   ##Vitesse de deplacement de l'ennemi
         self.hp=hp+echelle_difficulte/2  ##Points de vie de l'ennemi
         self.arme=arme 	##Arme de l'ennemi
         self.xp=xp+dico_upgrades_stats["gain_xp"]	##xp de l'ennemi
         self.hitbox=taille_hitbox
         self.degat=degat+echelle_difficulte
         self.dernier_coup=0
+
+        self.slow_fin=0
+        self.facteur_slow=1
 
         self.sprite_list=sprite if isinstance(sprite,list) else ([sprite] if sprite else [])
         self.animation_index=0
@@ -88,7 +94,8 @@ class ennemi_main:
         if not self.sprite_list:
             pygame.draw.rect(screen,(0,255,255),(pos_ecran[0],pos_ecran[1],50,50))
             return
-
+        if not (-(width*0.1)<=pos_ecran[0]<=width+(width*0.1) and -(height*0.1)<=pos_ecran[1]<=height+(height*0.1)):
+            return
         if len(self.sprite_list) > 1:
             self.animation_index += self.vitesse_animation
 
@@ -101,6 +108,12 @@ class ennemi_main:
         direction_x = cible_x - self.x
         direction_y = cible_y - self.y
         distance = math.hypot(direction_x, direction_y)
+        maintenant=pygame.time.get_ticks()
+
+        if maintenant>self.slow_fin:
+            self.vitesse=self.vitesse_base
+        else:
+            self.vitesse=self.vitesse_base*self.facteur_slow
 
         # Ça évite de "dépasser" le centre et de changer de cible par erreur
         if distance < 5: 
@@ -144,6 +157,10 @@ class ennemi_main:
             return True
         return False
     
+    def appliquer_slow(self,facteur,duree_ms):
+        self.facteur_slow=facteur
+        self.slow_fin=pygame.time.get_ticks()+duree_ms
+
     @staticmethod   ##Sert a attribuer une fonction a une classe sans avoir besoin d'instancier un objet
     def calculer_pos_spawn(player_x, player_y,width,height):    ##Calcule une position de spawn aleatoire autour du joueur
         distance=math.hypot(width,height)/2 ##Pythagore mais plus simple
@@ -265,10 +282,50 @@ class projectile_laser(projectiles_general):
     def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite=laser_sprite,degat=1,range=10,duree_AOE=0,aoe=False,aoe_rayon=None,degat_AOE=0,sprite_feu=None,sprite_explosion=None):
         super().__init__(x,y,vitesse+dico_upgrades_laser["vitesse_balles"],cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,0,0),degat=degat+dico_upgrades_laser["degat"],range=range+dico_upgrades_laser["portee"],duree_AOE=duree_AOE,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion)  ##Appelle le constructeur de la classe parente avec une couleur rouge
 
+    def chain_lightning(self, ennemi_initial, liste_ennemis):
+
+        if not dico_upgrades_uniques["laser"]["laser_electrique"]:
+            return
+
+        max_chaines = 5
+        distance_arc = self.range * 0.8
+
+        touches = {ennemi_initial}
+        source = ennemi_initial
+
+        for _ in range(max_chaines - 1):
+
+            cible = None
+            distance_min = float("inf")
+
+            for ennemi in liste_ennemis:
+                if ennemi in touches:
+                    continue
+
+                dist = math.hypot(ennemi.x - source.x, ennemi.y - source.y)
+
+                if dist <= distance_arc and dist < distance_min:
+                    distance_min = dist
+                    cible = ennemi
+
+            if cible is None:
+                break
+
+            mort = cible.prendre_degats(self.degat)
+
+            if dico_upgrades_uniques["laser"]["laser_ralentissant"]:
+                cible.appliquer_slow(0.2,2500)
+
+            if mort:
+                ajouter_xp(cible.xp)
+
+            touches.add(cible)
+            source = cible
+
 class projectile_roquette(projectiles_general):
     """Classe des projectiles roquettes"""
     def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite=roquette_sprite,degat=3,range=10,aoe=True,aoe_rayon=width/10,degat_AOE=1,duree_AOE=333,interval_tick_ms=500,sprite_feu=sprite_feu_roquette,sprite_explosion=sprite_explosion_roquette):
-        super().__init__(x,y,vitesse+dico_upgrades_roquette["vitesse_balles"],cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+dico_upgrades_roquette["degat"],range=range+dico_upgrades_roquette["portee"],aoe=aoe,aoe_rayon=aoe_rayon+dico_upgrades_roquette["rayon_aoe"]*10,degat_AOE=degat_AOE+dico_upgrades_roquette["degat"],duree_AOE=duree_AOE+dico_upgrades_roquette["duree_aoe"]*10,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion)  ##Appelle le constructeur de la classe parente avec une couleur orange
+        super().__init__(x,y,vitesse+dico_upgrades_roquette["vitesse_balles"],cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+dico_upgrades_roquette["degat"],range=range+dico_upgrades_roquette["portee"],aoe=aoe,aoe_rayon=aoe_rayon+dico_upgrades_roquette["rayon_aoe"]*10,degat_AOE=degat_AOE+dico_upgrades_roquette["degat"],duree_AOE=duree_AOE,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion)  ##Appelle le constructeur de la classe parente avec une couleur orange
         self.interval_tick_ms=interval_tick_ms
 
 class projectile_mine(projectiles_general):
@@ -348,15 +405,23 @@ class weapon_main:
         self.dernier_tir += duree_pause  ##Décale le temps du dernier tir pour compenser la pause
         
 class Explosion:
-    def __init__(self,x,y,sprite_list,vitesse_animation=0.1):
+    def __init__(self,x,y,sprite_list,rayon,vitesse_animation=0.1,):
         self.x=x
         self.y=y
-        self.sprite_list=sprite_list if sprite_list else []
+        self.rayon=rayon
+        self.sprite_list=[]
         self.animation_index=0
         self.vitesse_animation=vitesse_animation
         self.terminee=False
-        
+
+        if sprite_list:
+            taille=int(self.rayon*2)
+            for img in sprite_list:
+                img_scale=pygame.transform.scale(img,(taille,taille))
+                self.sprite_list.append(img_scale)        
     def update(self):
+        if not self.sprite_list:
+            return
         self.animation_index+=self.vitesse_animation
         if self.animation_index>=len(self.sprite_list):
             self.terminee=True
@@ -417,6 +482,7 @@ class AOE:
                 for ennemi in liste_ennemis[:]:
                     if math.hypot(self.x - ennemi.x, self.y - ennemi.y) <= self.rayon:
                         mort = ennemi.prendre_degats(self.degat)
+
                         if mort and xp_callback:
                             xp_callback(ennemi.xp)
 
@@ -441,20 +507,21 @@ class aura:
         self.rayon = rayon+dico_upgrades_aura["portee"]
         self.degat = degat+dico_upgrades_aura["degat"]
         self.sprite = sprite if sprite else []
-        self.interval_tick = max(interval_tick_ms-dico_upgrades_aura["degat"],100)
+        self.interval_tick = max(500 - dico_upgrades_aura["cadence_de_tir"], 100)
         self.dernier_tick = 0
 
         self.animation_index=0
         self.vitesse_animation=vitesse_animation
 
     def update(self, player_x, player_y, liste_ennemis, xp_callback=None):
-        self.rayon = width/10 + dico_upgrades_aura["portee"]
+        self.rayon = width/5 + dico_upgrades_aura["portee"]
         self.degat = 1 + dico_upgrades_aura["degat"]
         self.interval_tick = max(500 - dico_upgrades_aura["cadence_de_tir"], 100)
         maintenant = pygame.time.get_ticks()
         
         # On ne déclenche les dégâts que si le délai est passé
         if maintenant - self.dernier_tick >= self.interval_tick:
+            self.dernier_tick = maintenant
             # On boucle sur une copie de la liste pour éviter les erreurs de suppression
             for ennemi in liste_ennemis[:]: 
                 distance = math.hypot(player_x - ennemi.x, player_y - ennemi.y)
@@ -462,6 +529,7 @@ class aura:
                     # On inflige les dégâts
                     mort = ennemi.prendre_degats(self.degat)
                     global pv_joueur
+                    pv_joueur+=dico_upgrades_stats["vol_de_vie"]
                     pv_joueur=min(pv_joueur,pv_max_joueur)  ##S'assure que les PV du joueur ne deviennent pas négatifs
                     # Si l'ennemi meurt, on appelle le callback pour l'XP
                     if mort and xp_callback:
@@ -518,7 +586,6 @@ class tourelle:
         self.arme.delai = max(100, 1000 - dico_upgrades_tourelle["cadence_de_tir"]*10)
         self.arme.vitesse = width/100 + dico_upgrades_tourelle["vitesse_balles"]*10
         self.arme.degat = 0.5 + dico_upgrades_tourelle["degat"]/2
-        self.hp = 50+dico_upgrades_tourelle["hp"]
         self.max_hp = 50+dico_upgrades_tourelle["hp"]
         self.delai_spawn=max(200,10000-dico_upgrades_tourelle["cadence_de_tir"]*10)
         if self.arme.tirer():
@@ -654,7 +721,7 @@ def lancer_jeu(settings):
     aura_sprites=[]
     for i in range(1,8):
         img=pygame.image.load(f"Aura({i}).png").convert_alpha()
-        img=pygame.transform.scale(img,(width/10,width/10))
+        img=pygame.transform.scale(img,(width/5,width/5))
         aura_sprites.append(img)
 
     ###Sprite feu roquette
@@ -763,7 +830,7 @@ def lancer_jeu(settings):
     en_jeu=True
     #Variables de jeu
     player_x, player_y = 0, 0 # Position réelle du joueur dans le monde
-    vitesse_joueur = width/300  ##Vitesse de deplacement du joueur
+    vitesse_joueur = width/300+dico_upgrades_stats["vitesse"]*20  ##Vitesse de deplacement du joueur
     couleur_joueur = (255, 0, 0)
     types_ennemis = [Majo, Marcel,Terminateur,Philippe,Leure]  ##Liste des types d'ennemis
     liste_ennemis = []  ##Liste pour stocker les ennemis
@@ -776,12 +843,12 @@ def lancer_jeu(settings):
     roquette.nom="Roquette"
     mine=weapon_main(5000, projectile_mine,homing=False,portee_detection=math.inf,vitesse=0,aoe=True,aoe_rayon=width/20,duree_AOE=2500,duree=10000,degat_AOE=1,interval_tick_ms=500,degat=2,sprite=projectile_mine_sprite,sprite_feu=sprite_feu_mine,sprite_explosion=sprite_explosion_mine)  ##Crée une arme mine avec un délai de 1500ms entre chaque tir et des projectiles non homing
     mine.nom="Mine"
-    aura_active=aura(width/10,1,sprite=aura_sprites,interval_tick_ms=500,vitesse_animation=0.1)  ##Crée une aura qui inflige des dégâts aux ennemis à proximité toutes les 500ms
+    aura_active=aura(width/5,1,sprite=aura_sprites,interval_tick_ms=500,vitesse_animation=0.1)  ##Crée une aura qui inflige des dégâts aux ennemis à proximité toutes les 500ms
     aura_active.nom="Aura Active"
     tourelle_active=tourelle(0,0,sprite_batiment=tourelle_sprites,sprite_balle=projectile_tourelle_sprite,vitesse_animation=0.1)  ##Crée une tourelle qui tire des projectiles de tourelle
-    type_armes=["stats",laser]   ##Liste des types d'armes
+    type_armes=["stats",laser,roquette,mine,aura_active,tourelle_active]   ##Liste des types d'armes
     liste_armes=[laser,roquette,mine,aura_active,tourelle_active]   ##Liste des armes du joueur, utilisée pour le level up
-    armes_possedees=["stats"]+(["laser"] if laser in type_armes else [])+(["roquette"] if roquette in type_armes else []+(["mine"] if mine in type_armes else [])+(["aura"] if aura_active in type_armes else [])+(["tourelle"] if tourelle_active in type_armes else []))
+    armes_possedees=["stats"]+(["laser"] if laser in type_armes else [])+(["roquette"] if roquette in type_armes else [])+(["mine"] if mine in type_armes else [])+(["aura"] if aura_active in type_armes else [])+(["tourelle"] if tourelle_active in type_armes else [])
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
     liste_explosions=[]
     mines_actuelles=[]  ##Liste pour stocker les mines posées par le joueur
@@ -806,8 +873,13 @@ def lancer_jeu(settings):
     maintenant=0
     liste_aoe=[]
     player_x,player_y=0,0
-    
-
+    taille_base = int(TILE_SIZE * zoom)
+    # On ajoute 1 pixel pour l'overlapping
+    taille_overlap = taille_base + 1 
+    textures_zoom = {}
+    for key, surf in textures.items():
+        # On scale avec le pixel supplémentaire
+        textures_zoom[key] = pygame.transform.scale(surf, (taille_overlap, taille_overlap))
 
     while en_jeu:
         clock.tick(60)
@@ -883,15 +955,6 @@ def lancer_jeu(settings):
             #Map??
             screen.fill(white)
 
-            taille_base = int(TILE_SIZE * zoom)
-            # On ajoute 1 pixel pour l'overlapping
-            taille_overlap = taille_base + 1 
-
-            textures_zoom = {}
-
-            for key, surf in textures.items():
-                # On scale avec le pixel supplémentaire
-                textures_zoom[key] = pygame.transform.scale(surf, (taille_overlap, taille_overlap))
 
             for layer in map_data["layers"]:
                 for tile in layer["tiles"]:
@@ -996,9 +1059,12 @@ def lancer_jeu(settings):
                 # 2. APPLIQUER DEGATS ET RECUPERER XP
                 if hit_ennemi:
                     # On capture si l'ennemi est mort (nécessite le 'return True' dans prendre_degats)
-                    pv_joueur=min(pv_joueur,pv_max_joueur) 
+                    pv_joueur=max(0,pv_joueur) 
                     mort = hit_ennemi.prendre_degats(proj.degat)
-                    
+                    if isinstance(proj,projectile_laser) and dico_upgrades_uniques["laser"]["laser_ralentissant"]:
+                        hit_ennemi.appliquer_slow(0.2,2500)
+                    if isinstance(proj,projectile_laser):
+                        proj.chain_lightning(hit_ennemi,liste_ennemis)
                     if mort:
                         xp += hit_ennemi.xp #J'avais oublie ca ;-;
 
@@ -1018,7 +1084,7 @@ def lancer_jeu(settings):
                         )
                         liste_aoe.append(aoe_zone)
                         
-                        liste_explosions.append(Explosion(proj.x, proj.y, proj.sprite_explosion))
+                        liste_explosions.append(Explosion(proj.x, proj.y, proj.sprite_explosion,proj.aoe_rayon))
 
                     # On vérifie si le projectile est toujours dans la liste avant de remove
                     if proj in liste_projectiles:
@@ -1026,7 +1092,7 @@ def lancer_jeu(settings):
 
             #Mettre a jour l'aura
             if aura_active in type_armes:
-                aura_active.update(player_x, player_y, liste_ennemis, xp_callback=lambda xp_gagne: globals().update(xp=xp + xp_gagne))
+                aura_active.update(player_x, player_y, liste_ennemis, xp_callback=ajouter_xp)
                 aura_active.dessiner(screen, player_x, player_y, offset_x, offset_y)
 
 
@@ -1038,11 +1104,11 @@ def lancer_jeu(settings):
                 impact = False  # indique si le projectile touche quelque chose
 
                 # Collision avec les tourelles
-                for t in liste_tourelles:
+                for t in liste_tourelles[:]:
                     if proj.rect.colliderect(t.colliderect):
                         t.hp -= proj.degat
                         impact = True
-                        if t.hp<=0:
+                        if t.hp<=0 and t in liste_tourelles:
                             liste_tourelles.remove(t)
                         break
 
@@ -1059,7 +1125,7 @@ def lancer_jeu(settings):
                 # Si le projectile a eu un impact, créer explosion / AOE et le retirer
                 if impact:
                     if proj.aoe:
-                        explosion = Explosion(proj.x, proj.y, proj.sprite_explosion)
+                        explosion = Explosion(proj.x, proj.y, proj.sprite_explosion,proj.aoe_rayon)
                         liste_explosions.append(explosion)
                         aoe_zone = AOE(
                             proj.x, proj.y, proj.aoe_rayon, proj.degat_AOE, proj.duree_AOE,
@@ -1078,11 +1144,11 @@ def lancer_jeu(settings):
                     liste_ennemis.remove(ennemi)
 
                 #pour les tourelles
-                for t in liste_tourelles:
+                for t in liste_tourelles[:]:
                     if ennemi.rect.colliderect(t.colliderect):
                         if maintenant-ennemi.dernier_coup>=attack_delay_ennemi:
                             t.hp-=ennemi.degat
-                            if t.hp<=0:
+                            if t.hp<=0 and t in liste_tourelles:
                                 liste_tourelles.remove(t)
                             ennemi.dernier_coup=maintenant
 
@@ -1160,7 +1226,8 @@ def lancer_jeu(settings):
         if pv_joueur<=0:
             en_jeu=False
             
-        
+        #pour les vilaines tourelles >:(
+        tourelle_active.delai_spawn=max(200,10000-dico_upgrades_tourelle["cadence_de_tir"]*10)
 
         duree_journee+=1
         echelle_difficulte=nombre_journees*2+duree_journee//1200
