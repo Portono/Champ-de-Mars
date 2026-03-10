@@ -262,13 +262,13 @@ class projectiles_general:
 
 class projectile_laser(projectiles_general):
     """Classe des projectiles laser"""
-    def __init__(self,x,y,vitesse+dico_upgrades_laser["vitesse_balles"],cible_initiale,homing=False,sprite=laser_sprite,degat=1+dico_upgrades_laser["degat"],range=10+dico_upgrades_laser["portee"],duree_AOE=0,aoe=False,aoe_rayon=None,degat_AOE=0,sprite_feu=None,sprite_explosion=None):
-        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,0,0),degat=degat,range=range,duree_AOE=duree_AOE,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion)  ##Appelle le constructeur de la classe parente avec une couleur rouge
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite=laser_sprite,degat=1,range=10,duree_AOE=0,aoe=False,aoe_rayon=None,degat_AOE=0,sprite_feu=None,sprite_explosion=None):
+        super().__init__(x,y,vitesse+dico_upgrades_laser["vitesse_balles"],cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,0,0),degat=degat+dico_upgrades_laser["degat"],range=range+dico_upgrades_laser["portee"],duree_AOE=duree_AOE,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion)  ##Appelle le constructeur de la classe parente avec une couleur rouge
 
 class projectile_roquette(projectiles_general):
     """Classe des projectiles roquettes"""
-    def __init__(self,x,y,vitesse+dico_upgrades_roquette["vitesse_balles"],cible_initiale,homing=True,sprite=roquette_sprite,degat=3+dico_upgrades_roquette["degat"],range=10+dico_upgrades_roquette["portee"],aoe=True,aoe_rayon=width/10+dico_upgrades_roquette["rayon_aoe"]*10,degat_AOE=1+dico_upgrades_roquette["degat"],duree_AOE=333+dico_upgrades_roquette["duree_aoe"]*10,interval_tick_ms=500,sprite_feu=sprite_feu_roquette,sprite_explosion=sprite_explosion_roquette):
-        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat,range=range,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,duree_AOE=duree_AOE,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion)  ##Appelle le constructeur de la classe parente avec une couleur orange
+    def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite=roquette_sprite,degat=3,range=10,aoe=True,aoe_rayon=width/10+dico_upgrades_roquette["rayon_aoe"]*10,degat_AOE=1,duree_AOE=333+dico_upgrades_roquette["duree_aoe"]*10,interval_tick_ms=500,sprite_feu=sprite_feu_roquette,sprite_explosion=sprite_explosion_roquette):
+        super().__init__(x,y,vitesse+dico_upgrades_roquette["vitesse_balles"],cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+dico_upgrades_roquette["degat"],range=range+dico_upgrades_roquette["portee"],aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE+dico_upgrades_roquette["degat"],duree_AOE=duree_AOE,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion)  ##Appelle le constructeur de la classe parente avec une couleur orange
         self.interval_tick_ms=interval_tick_ms
 
 class projectile_mine(projectiles_general):
