@@ -282,15 +282,15 @@ class projectile_laser(projectiles_general):
     def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite=laser_sprite,degat=1,range=10,duree_AOE=0,aoe=False,aoe_rayon=None,degat_AOE=0,sprite_feu=None,sprite_explosion=None):
         super().__init__(x,y,vitesse+dico_upgrades_laser["vitesse_balles"],cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,0,0),degat=degat+dico_upgrades_laser["degat"],range=range+dico_upgrades_laser["portee"],duree_AOE=duree_AOE,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion)  ##Appelle le constructeur de la classe parente avec une couleur rouge
 
-    def chain_lightning(self, ennemi_initial, liste_ennemis):
-
+    def chain_lightning(self, ennemi_initial, liste_ennemis,liste_arcs):
+        global arc_electrique_sprite
         if not dico_upgrades_uniques["laser"]["laser_electrique"]:
             return
 
         max_chaines = 5
-        distance_arc = self.range * 0.8
+        distance_arc = width/5+dico_upgrades_laser["portee"]*40
 
-        touches = {ennemi_initial}
+        touches = [ennemi_initial]
         source = ennemi_initial
 
         for _ in range(max_chaines - 1):
@@ -311,6 +311,8 @@ class projectile_laser(projectiles_general):
             if cible is None:
                 break
 
+            liste_arcs.append(arc_electrique(source.x,source.y,cible.x,cible.y,arc_electrique_sprite))
+
             mort = cible.prendre_degats(self.degat)
 
             if dico_upgrades_uniques["laser"]["laser_ralentissant"]:
@@ -319,7 +321,7 @@ class projectile_laser(projectiles_general):
             if mort:
                 ajouter_xp(cible.xp)
 
-            touches.add(cible)
+            touches.append(cible)
             source = cible
 
 class projectile_roquette(projectiles_general):
@@ -555,7 +557,6 @@ class aura:
 
     def dessiner(self, screen, player_x, player_y, offset_x, offset_y):
 
-        # 🔥 on rescales uniquement si le rayon change
         if self.rayon != self.ancien_rayon:
 
             diametre = int(self.rayon * 2)
@@ -654,11 +655,48 @@ class tourelle:
     def compenser_pause(self,duree_pause):
         self.dernier_spawn+=duree_pause
     
-        
+class arc_electrique:
+    def __init__(self,x1,y1,x2,y2,sprite_list,duree=150,vitesse_animation=0.5):
+
+        self.x1=x1
+        self.y1=y1
+        self.x2=x2
+        self.y2=y2
+
+        self.sprites=sprite_list
+        self.index=0
+        self.vitesse_animation=vitesse_animation
+
+        self.temps_creation=pygame.time.get_ticks()
+        self.duree=duree
+        self.terminee=False
+
+        dx=x2-x1
+        dy=y2-y1
+        self.angle=-math.degrees(math.atan2(dy,dx))
+        self.distance=math.hypot(dx,dy)
+
+    def update(self):
+        if pygame.time.get_ticks()-self.temps_creation>=self.duree:
+            self.terminee=True
+            return
+        self.index+=self.vitesse_animation
+        if self.index>=len(self.sprites):
+            self.index=0
+    def dessiner(self,screen,offset_x,offset_y):
+        sprite=self.sprites[int(self.index)]
+
+        sprite=pygame.transform.scale(sprite,(int(self.distance),sprite.get_height()))
+        sprite=pygame.transform.rotate(sprite,self.angle)
+
+        rect=sprite.get_rect(center=((self.x1+self.x2)/2-offset_x,(self.y1+self.y2)/2-offset_y))
+
+        screen.blit(sprite,rect)
+
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette,image_majo_liste,image_terminateur_liste,aura_sprites
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette,image_majo_liste,image_terminateur_liste,aura_sprites,arc_electrique_sprite,liste_arcs
     player_x,player_y=0,0
-    reset_upgrades()
+    #reset_upgrades()
 
     #Chargement de la map
     with open("Map_Jeu.json","r") as f:
@@ -843,6 +881,11 @@ def lancer_jeu(settings):
     astro=pygame.image.load("Astro.png").convert_alpha()
     astro=pygame.transform.scale(astro,(width/20,int(astro.get_height()/astro.get_width()*width/20)))
 
+    ##Chargement de l'arc electrique
+    arc_electrique_sprite=[]
+    for i in range(1,4):
+        img=pygame.image.load(f"ArcE({i}).png").convert_alpha() ## on resize pas car la fonction le fait
+        arc_electrique_sprite.append(img)
 
     echelle_difficulte=0
     enemi_spawn_delay=4000-echelle_difficulte
@@ -900,6 +943,7 @@ def lancer_jeu(settings):
     dernier_soin=pygame.time.get_ticks()
     maintenant=0
     liste_aoe=[]
+    liste_arcs=[]
     player_x,player_y=0,0
     taille_base = int(TILE_SIZE * zoom)
     # On ajoute 1 pixel pour l'overlapping
@@ -1087,12 +1131,12 @@ def lancer_jeu(settings):
                 # 2. APPLIQUER DEGATS ET RECUPERER XP
                 if hit_ennemi:
                     # On capture si l'ennemi est mort (nécessite le 'return True' dans prendre_degats)
-                    pv_joueur=max(0,pv_joueur) 
+                    pv_joueur=max(0,pv_joueur)
+                    if isinstance(proj,projectile_laser):
+                        proj.chain_lightning(hit_ennemi,liste_ennemis,liste_arcs) 
                     mort = hit_ennemi.prendre_degats(proj.degat)
                     if isinstance(proj,projectile_laser) and dico_upgrades_uniques["laser"]["laser_ralentissant"]:
                         hit_ennemi.appliquer_slow(0.2,2500)
-                    if isinstance(proj,projectile_laser):
-                        proj.chain_lightning(hit_ennemi,liste_ennemis)
                     if mort:
                         xp += hit_ennemi.xp #J'avais oublie ca ;-;
 
@@ -1231,6 +1275,14 @@ def lancer_jeu(settings):
         #Dessiner les explosions
         for explosion in liste_explosions[:]:
             explosion.dessiner(screen,offset_x,offset_y)
+        
+        #gerer les arcs
+        for arc in liste_arcs[:]:
+            arc.update()
+            if arc.terminee:
+                liste_arcs.remove(arc)
+            if arc in liste_arcs:
+                arc.dessiner(screen,offset_x,offset_y)
         
             
         #Dessiner la barre de vie
