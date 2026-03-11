@@ -784,9 +784,9 @@ def lancer_jeu(settings):
 
     ##Terminateur
     projectile_terminateur=[]
-    for i in range(1,5):
+    for i in range(1,12):
         img=pygame.image.load(f"E_Shoot({i}).png").convert_alpha()
-        img=pygame.transform.scale(img,(width/30,int(img.get_height()/img.get_width()*width/30)))
+        img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
         projectile_terminateur.append(img)
 
     ##Chargement des sprites des AOE
