@@ -550,7 +550,7 @@ class aura:
                 if dist <= self.rayon:
 
                     mort = ennemi.prendre_degats(self.degat)
-                    pv_joueur=max(pv_max_joueur,pv_joueur+dico_upgrades_stats["vol_de_vie"]*self.degat)
+                    pv_joueur=min(pv_max_joueur,pv_joueur+dico_upgrades_stats["vol_de_vie"]*self.degat)
                     if mort and xp_callback:
                         xp_callback(ennemi.xp)
 
@@ -1006,6 +1006,9 @@ def lancer_jeu(settings):
                 for _ in range(niveau):
                     afficher_upgrades(screen,width,height,3,armes_possedees,font)
                     niveau -= 1
+                pv_max_joueur=100+dico_upgrades_stats["pv"]*10
+                pv_joueur=100+dico_upgrades_stats["pv"]*10
+                vitesse_joueur=width/300+dico_upgrades_stats["vitesse"]*20
                 armes_possedees=["stats"]+(["laser"] if laser in type_armes else [])+(["roquette"] if roquette in type_armes else []+(["mine"] if mine in type_armes else [])+(["aura"] if aura_active in type_armes else [])+(["tourelle"] if tourelle_active in type_armes else []))
                 duree_pause=pygame.time.get_ticks()-temps_debut_pause
                 for armes in type_armes:
@@ -1138,7 +1141,7 @@ def lancer_jeu(settings):
                 # 2. APPLIQUER DEGATS ET RECUPERER XP
                 if hit_ennemi:
                     # On capture si l'ennemi est mort (nécessite le 'return True' dans prendre_degats)
-                    pv_joueur=max(0,pv_joueur+dico_upgrades_stats["vol_de_vie"]*proj.degat)
+                    pv_joueur=min(pv_max_joueur,pv_joueur+dico_upgrades_stats["vol_de_vie"]*proj.degat)
                     if isinstance(proj,projectile_laser):
                         proj.chain_lightning(hit_ennemi,liste_ennemis,liste_arcs) 
                     mort = hit_ennemi.prendre_degats(proj.degat)
@@ -1291,6 +1294,11 @@ def lancer_jeu(settings):
             if arc in liste_arcs:
                 arc.dessiner(screen,offset_x,offset_y)
         
+        #Gerer la regen_pv
+        maintenant=pygame.time.get_ticks()
+        if maintenant-dernier_soin>=1000:
+            pv_joueur=min(pv_max_joueur,pv_joueur+dico_upgrades_stats["regen_pv"])
+            dernier_soin=maintenant
             
         #Dessiner la barre de vie
         for rect,color in [("max_health_bar_rect",red),("health_bar_rect",green)]:
