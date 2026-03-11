@@ -1,5 +1,4 @@
 import pygame
-from save_load import*
 
 pygame.init()
 
@@ -32,7 +31,6 @@ gray=(128,128,128)
 
 #Predeffinission de la police et de la couleur des boutons
 menu_font=pygame.font.Font("font.ttf", int(height*0.05)) ##Definition de la police et de la taille du texte des boutons
-font=pygame.font.Font(None,int(width/50))
 button_color=black
 hover_color=gray
 text_color=orange
@@ -60,6 +58,9 @@ logo_import_width=logo_import.get_width()
 logo_import_height=logo_import.get_height()
 logo=pygame.transform.scale(logo_import,(width,int(logo_import_height/logo_import_width*width)))
 
+#astrowantsyou
+AstroWantsYou=pygame.image.load("AstroWantsYou.png")
+AstroWantsYou=pygame.transform.scale(AstroWantsYou,(int(AstroWantsYou.get_width()/AstroWantsYou.get_height()*height),height))
 #on définit les variables pour les changement de scène du menu
 menu_main="main"
 menu_settings="settings"
@@ -79,7 +80,6 @@ def refresh_ui():
         screen=pygame.display.set_mode((width,height), pygame.FULLSCREEN)
     elif fullscreen==False:
         screen=pygame.display.set_mode((width,height))
-    font=pygame.font.Font(None,int(width/50))
     #Repositionnement du logo
     logo=pygame.transform.smoothscale(logo_import,(width,int(logo_import_height/logo_import_width*width)))
     #Repositionnement des boutons
@@ -111,6 +111,9 @@ def refresh_ui():
     astropedia_button_rect.center=(width//2,height//4.5)
     ##Taille de la police
     menu_font=pygame.font.Font("font.ttf", int(height*0.05))
+    ##Taille de AstroWantsYou
+    AstroWantsYou=pygame.image.load("AstroWantsYou.png")
+    AstroWantsYou=pygame.transform.scale(AstroWantsYou,(int(AstroWantsYou.get_width()/AstroWantsYou.get_height()*height),height))
 
 def afficher_menu():
     refresh_ui()
@@ -137,15 +140,15 @@ def boucle_menu(pause=False):
                 #   Main Menu   #
                 if current_menu==menu_main: ##Si on est dans le menu principal
                     width_input_toggle,height_input_toggle=False,False
-                    if play_button_rect.collidepoint(mouse_pos):   ##Si le bouton Play est appuye
-                        if __name__=="Main":
-                            return
+                    if play_button_rect.collidepoint(mouse_pos):
                         pygame.mixer.music.stop()
-                        play=True
+                        screen.fill(black)
+                        screen.blit(AstroWantsYou, AstroWantsYou.get_rect(center=(width//2,height//2)))
+                        pygame.display.flip()
+                        return {"width": width, "height": height, "fullscreen": fullscreen, "play": True}
                     if settings_button_rect.collidepoint(mouse_pos):   ##Si le bouton Settings est appuye
                         current_menu=menu_settings
                     if quit_button_rect.collidepoint(mouse_pos):
-                        sauvegarder_jeu()
                         pygame.quit()       ##Quitte pygame
                         exit()      ##Quitte le programme
                     if astropedia_button_rect.collidepoint(mouse_pos):
@@ -167,8 +170,6 @@ def boucle_menu(pause=False):
                         height_button_text="Hauteur"
                         user_height_input=""
                 elif current_menu==menu_astropedia:
-                    if goback_button_rect.collidepoint(mouse_pos):
-                        current_menu=menu_main
                     pass						##TEMPORAIRE
 
             ##Changement de la resolution via l'input utilisateur
@@ -228,18 +229,9 @@ def boucle_menu(pause=False):
                 texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
                 screen.blit(texte_surface, texte_rect)  ##Affichage du texte
         if current_menu==menu_astropedia:
-            astropedia_text=font.render("     Nettoyeur haute pression thermique MNT215",True,black)
-            astropedia_text_rect=astropedia_text.get_rect(topleft=(0,0))
+            astropedia_text=menu_font.render("coucou",True,black)
+            astropedia_text_rect=astropedia_text.get_rect(center=(width//2,height//2))
             screen.blit(astropedia_text,astropedia_text_rect)
-            for rect,texte in [(goback_button_rect,"Retour")]:
-                if rect.collidepoint(mouse_pos):    ##Si la souris est au dessus du bouton
-                    button_color=hover_color
-                else:
-                    button_color=black
-                pygame.draw.rect(screen,button_color,goback_button_rect,border_radius=100)
-                texte_surface=menu_font.render(texte,True,orange)    ##Creation du texte
-                texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
-                screen.blit(texte_surface, texte_rect)
         #Toggle du fullscreen
         if fullscreen_change==True or resolution_change==True:
             fullscreen_change=False
@@ -247,8 +239,6 @@ def boucle_menu(pause=False):
             refresh_ui()
         pygame.display.flip()
     return {"width": width, "height": height, "fullscreen": fullscreen, "play": play}
-
-
 
 
 
