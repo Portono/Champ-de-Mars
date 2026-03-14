@@ -500,6 +500,7 @@ class AOE:
                 if math.hypot(self.x - player_rect.centerx, self.y - player_rect.centery) <= self.rayon and not random.randint(1,11)<=dico_upgrades_stats["esquive"]:
                     global pv_joueur
                     pv_joueur -= self.degat  # L'AOE inflige des dégâts au joueur
+                    Soundhit.play()
             
             # SI LA CIBLE EST UN ENNEMI
             else:
@@ -994,7 +995,8 @@ def lancer_jeu(settings):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     temps_debut_pause=pygame.time.get_ticks()
-                    afficher_menu_pause()
+                    settings=afficher_menu_pause()
+                    set_sfx_volume(settings.get("sound_volume",50)/100)
                     duree_pause=pygame.time.get_ticks()-temps_debut_pause
 
                     for classe in derniers_spawn:
