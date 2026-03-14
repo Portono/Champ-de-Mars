@@ -12,15 +12,14 @@ dico_upgrades_stats={
                 "vitesse":0,                        
                 "regen_pv":0,           
                 "vol_de_vie":0,  
-                "esquive":0,
-                "renvoi":0
+                "esquive":0
                 }
 
 #------------------Upgrades armes uniques----------------------------------------
 dico_upgrades_uniques={
                 "laser":{"laser_electrique":False,                  ##Fait
                          "laser_ralentissant":False,                ##Fait
-                         "laser_perforant":False
+                         "laser_perforant":True
                          },
                 "roquette":{"roquette_shrapnel":False,
                             "roquette_enflammee":False,
@@ -43,7 +42,6 @@ dico_upgrades_uniques={
 dico_upgrades_laser={
                 "cadence_de_tir":0,
                 "degat":0,
-                "taille_projectile":0,
                 "vitesse_balles":0,
                 "portee":0,
                 }  
@@ -51,7 +49,6 @@ dico_upgrades_laser={
 dico_upgrades_roquette={
                 "cadence_de_tir":0,
                 "degat":0,
-                "taille_projectile":0,
                 "vitesse_balles":0,
                 "portee":0,
                 "rayon_aoe":0,
@@ -60,7 +57,6 @@ dico_upgrades_roquette={
 dico_upgrades_mine={
                 "cadence_de_tir":0,
                 "degat":0,
-                "taille_projectile":0,
                 "rayon_aoe":0,
                 "duree_aoe":0,
                 "duree_vie":0
@@ -166,18 +162,20 @@ def afficher_upgrades(screen, width, height, nb_upgrades, armes_possedees, font,
                 if 0 <= index_clique < nb_u:
                     arme_choisie, stat_choisie = liste_upgrades[index_clique]
                     
-                    # Cas 1 : C'est une nouvelle arme (on l'ajoute à la liste du joueur)
+                    #C'est une nouvelle arme (on l'ajoute à la liste du joueur)
                     if stat_choisie == "nouvelle arme":
                         armes_possedees.append(arme_choisie)
                     
-                    # Cas 2 : C'est une upgrade de stat classique
-                    elif arme_choisie in master_dico:
-                        master_dico[arme_choisie][stat_choisie] += 1
-                        
-                    # Cas 3 : C'est une upgrade unique (True/False)
+                    #C'est une upgrade unique (True/False)
                     elif arme_choisie in dico_upgrades_uniques:
                          dico_upgrades_uniques[arme_choisie][stat_choisie] = True
+                    
+                    #C'est une upgrade de stat classique
+                    elif arme_choisie in master_dico:
+                        master_dico[arme_choisie][stat_choisie] += 1
+                    
                     return liste_upgrades[index_clique]
+                    
 
         souris_x, souris_y = pygame.mouse.get_pos()
 
