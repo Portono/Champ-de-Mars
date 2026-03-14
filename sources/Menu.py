@@ -211,7 +211,7 @@ def boucle_menu(pause=False):
                         screen.fill(black)
                         screen.blit(AstroWantsYou, AstroWantsYou.get_rect(center=(width//2,height//2)))
                         pygame.display.flip()
-                        return {"width": width, "height": height, "fullscreen": fullscreen, "play": True}
+                        return {"width": width, "height": height, "fullscreen": fullscreen, "play": True,"sound_volume":sound_volume}
                     if settings_button_rect.collidepoint(mouse_pos):   ##Si le bouton Settings est appuye
                         current_menu=menu_settings
                     if quit_button_rect.collidepoint(mouse_pos):
