@@ -8,6 +8,7 @@ def afficher_menu_pause():
               if event.type == pygame.QUIT:
                    pygame.quit()
                    exit()
-       if boucle_menu(pause=True):
-             return  # Quitter le menu pause
+       result = boucle_menu(pause=True)
+       if result:
+             return result  # Quitter le menu pause
 
