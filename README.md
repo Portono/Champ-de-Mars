@@ -1,6 +1,6 @@
 # CHAMP DE MARS
 
-Survival Shooter (Pygame)
+Survival Shooter Roguelike (Pygame)
 
 # Description du projet
 
