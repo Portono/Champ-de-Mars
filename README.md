@@ -56,6 +56,8 @@ Pour lancer le jeu :
 python sources/main.py
 ```
 
+*à éxécuter*
+
 # Fabriqué avec
 
 * **Python** — Langage de programmation
