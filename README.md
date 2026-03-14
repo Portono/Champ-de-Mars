@@ -64,7 +64,14 @@ Version actuelle : **1.0**
 
 # Auteurs
 
-* Développeur principal : (ton nom)
+* Développeurs :
+-Evan Miniscloux
+-Evan Berthelin
+-Mael Barbaros
+
+*Design graphique:
+-Evan Berthelin
+-Mael Barbaros
 
 # License
 
