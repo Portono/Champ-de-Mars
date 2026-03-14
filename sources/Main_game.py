@@ -230,6 +230,7 @@ class projectiles_general:
         self.sprite_explosion=sprite_explosion
         self.vitesse_animation=vitesse_animation
         self.animation_index=0
+        self.ennemis_touches=[]
         if sprite_feu!=None:
             self.sprite_feu=sprite_feu
         else:
@@ -1157,9 +1158,17 @@ def lancer_jeu(settings):
                 # 1. Détection collision
                 hit_ennemi = None
                 for ennemi in liste_ennemis:
-                    if proj.rect.colliderect(ennemi.rect):
-                        hit_ennemi = ennemi
-                        break
+                    if not proj.rect.colliderect(ennemi.rect):
+                        continue
+
+                    if (isinstance(proj, projectile_laser)
+                        and dico_upgrades_uniques["laser"]["laser_perforant"]
+                        and ennemi in proj.ennemis_touches
+                    ):
+                        continue
+
+                    hit_ennemi = ennemi
+                    break
 
                 # 2. APPLIQUER DEGATS ET RECUPERER XP
                 if hit_ennemi:
@@ -1170,6 +1179,8 @@ def lancer_jeu(settings):
                     mort = hit_ennemi.prendre_degats(proj.degat)
                     if isinstance(proj,projectile_laser) and dico_upgrades_uniques["laser"]["laser_ralentissant"]:
                         hit_ennemi.appliquer_slow(0.2,2500)
+                    if isinstance(proj,projectile_laser) and dico_upgrades_uniques["laser"]["laser_perforant"]:
+                        proj.ennemis_touches.append(hit_ennemi)
                     if mort:
                         xp += hit_ennemi.xp #J'avais oublie ca ;-;
 
