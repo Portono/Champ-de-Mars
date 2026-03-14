@@ -37,17 +37,9 @@ afin d'installer toutes les bibliotheques necessaires
 
 Les étapes pour installer le projet :
 
-1. Télécharger ou cloner le projet :
+1. Télécharger ou cloner le projet
 
-```
-git clone <url_du_repo>
-```
-
-2. Se placer dans le dossier du projet :
-
-```
-cd nom_du_projet
-```
+2. Installer les bibliiotheques requises
 
 3. Vérifier que pygame est installé.
 
