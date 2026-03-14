@@ -2,24 +2,25 @@
 
 Survival Shooter (Pygame)
 
-# Une petite description du projet
+# Description du projet
 
 Ce projet est un jeu développé en **Python avec la bibliothèque Pygame**.
-Le joueur contrôle un personnage qui doit survivre face à des vagues d’ennemis qui apparaissent autour de lui.
+Le joueur contrôle un personnage qui doit survivre face à des vagues d’ennemis apparaissant autour de lui.
 
 En éliminant les ennemis, le joueur gagne de l’**expérience (XP)** qui lui permet d’obtenir différentes **améliorations (upgrades)**. Ces améliorations peuvent modifier les statistiques du joueur ou ajouter des effets spéciaux aux armes (électricité en chaîne, ralentissement, explosions, etc.).
 
-Le jeu comprend plusieurs types d’ennemis avec des comportements différents ainsi qu’un système de difficulté qui augmente progressivement au cours de la partie.
+Le jeu comprend plusieurs types d’ennemis avec des comportements différents ainsi qu’un **système de difficulté qui augmente progressivement** au cours de la partie.
 
 # Pour commencer
 
-Ces instructions vous permettront d’obtenir une copie du projet et de le faire fonctionner sur votre machine.
+Si vous consultez ce projet sur GitHub, téléchargez la **dernière Release** disponible.
+Si vous voyez ce projet depuis une autre plateforme, nous vous recommandons de vous rendre sur notre dépôt GitHub (lien ci-dessous).
 
 # Pré-requis
 
-Ce qu'il est requis pour commencer avec votre projet :
+Ce qui est nécessaire pour exécuter le projet :
 
-* Python 3
+* **Python 3**
 * La bibliothèque **pygame**
 
 Installation de pygame :
@@ -27,21 +28,22 @@ Installation de pygame :
 ```
 pip install pygame
 ```
-ou alors
+
+ou :
+
 ```
 pip install -r requirements.txt
 ```
-afin d'installer toutes les bibliotheques necessaires
+
+afin d'installer toutes les bibliothèques nécessaires.
 
 # Installation
 
 Les étapes pour installer le projet :
 
-1. Télécharger ou cloner le projet
-
-2. Installer les bibliiotheques requises
-
-3. Vérifier que pygame est installé.
+1. Télécharger ou cloner le projet.
+2. Installer les bibliothèques requises.
+3. Vérifier que **pygame** est correctement installé.
 
 # Démarrage
 
@@ -53,11 +55,12 @@ python main.py
 
 # Fabriqué avec
 
-* **Python** – Langage de programmation
-* **Pygame** – Bibliothèque utilisée pour le moteur du jeu
-* **JSON** – Sauvegarde de certaines données
-* **Sprites 2D** – Graphismes du jeu
-  * Pour les sprites Pixilart a ete utilise
+* **Python** — Langage de programmation
+* **Pygame** — Bibliothèque utilisée pour le moteur du jeu
+* **JSON** — Utilisé pour la sauvegarde de certaines données
+* **Sprites 2D**
+
+Sprites réalisés avec **Pixilart**.
 
 # Versions
 
@@ -65,14 +68,16 @@ Version actuelle : **1.0**
 
 # Auteurs
 
-* Développeurs :
-  - Evan Miniscloux
-  - Evan Berthelin
-  - Mael Barbaros
+**Développeurs :**
 
-* Design graphique:
-  - Evan Berthelin
-  - Mael Barbaros
+* Evan Miniscloux
+* Evan Berthelin
+* Mael Barbaros
+
+**Design graphique :**
+
+* Evan Berthelin
+* Mael Barbaros
 
 # Dépôt GitHub officiel
 
@@ -84,4 +89,4 @@ https://github.com/Portono/Champ-de-Mars
 
 # License
 
-Ce projet est sous licence MIT - voir le fichier LICENSE pour plus d'informations.
+Ce projet est sous licence **MIT** — voir le fichier `LICENSE` pour plus d'informations.
