@@ -74,7 +74,7 @@ Version actuelle : **1.0**
   - Evan Berthelin
   - Mael Barbaros
 
-## Dépôt GitHub officiel
+# Dépôt GitHub officiel
 
 Le code source complet du projet, ainsi que l'historique des versions et les mises à jour, sont disponibles sur GitHub :
 
