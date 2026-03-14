@@ -1205,10 +1205,13 @@ def lancer_jeu(settings):
 
                     # On vérifie si le projectile est toujours dans la liste avant de remove
                     if proj in liste_projectiles:
-                        if proj.est_trop_loin():
+                        if proj.est_trop_loin() or temps_ecoule:
                             liste_projectiles.remove(proj)
-                        elif not isinstance(proj,projectile_laser) and not dico_upgrades_uniques["laser"]["laser_perforant"]:
+                        elif hit_ennemi and not (
+                            isinstance(proj, projectile_laser)
+                            and dico_upgrades_uniques["laser"]["laser_perforant"]):
                             liste_projectiles.remove(proj)
+
                             
 
             #Mettre a jour l'aura
