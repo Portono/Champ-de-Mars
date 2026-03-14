@@ -323,7 +323,7 @@ def boucle_menu(pause=False):
             resolution_change=False
             refresh_ui()
         pygame.display.flip()
-    return {"width": width, "height": height, "fullscreen": fullscreen, "play": play}
+    return {"width": width, "height": height, "fullscreen": fullscreen, "play": play,"sound_volume":sound_volume}
 
 
 
