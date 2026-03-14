@@ -12,14 +12,14 @@ dico_upgrades_stats={
                 "vitesse":0,                        
                 "regen_pv":0,           
                 "vol_de_vie":0,  
-                "esquive":0
+                "esquive":0  ##faut cap a 10
                 }
 
 #------------------Upgrades armes uniques----------------------------------------
 dico_upgrades_uniques={
                 "laser":{"laser_electrique":False,                  ##Fait
                          "laser_ralentissant":False,                ##Fait
-                         "laser_perforant":True
+                         "laser_perforant":False                    ##Fait
                          },
                 "roquette":{"roquette_shrapnel":False,
                             "roquette_enflammee":False,
