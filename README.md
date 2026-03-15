@@ -22,6 +22,7 @@ Ce qui est nécessaire pour exécuter le projet :
 
 * **Python 3.13**
 * La bibliothèque **pygame**
+* La bibliothèque **pygame_widgets**
 
 Installation de pygame :
 
