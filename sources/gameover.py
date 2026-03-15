@@ -1,9 +1,10 @@
 import pygame
 from Menu import*
 from Sounddesign import*
+from paths import data_path
 pygame.init()
 screen=pygame.display.set_mode((width,height))
-front=pygame.font.Font("data/fontgameover.ttf",int(width/7))
+front=pygame.font.Font(data_path("fontgameover.ttf"),int(width/7))
 
 def afficher_gameover():
     tps_debut=pygame.time.get_ticks()
