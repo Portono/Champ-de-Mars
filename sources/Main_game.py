@@ -359,6 +359,19 @@ class projectile_roquette(projectiles_general):
     def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite=roquette_sprite,degat=3,range=10,aoe=True,aoe_rayon=width/10,degat_AOE=1,duree_AOE=333,interval_tick_ms=500,sprite_feu=sprite_feu_roquette,sprite_explosion=sprite_explosion_roquette):
         super().__init__(x,y,vitesse+dico_upgrades_roquette["vitesse_balles"],cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+dico_upgrades_roquette["degat"],range=range+dico_upgrades_roquette["portee"],aoe=aoe,aoe_rayon=aoe_rayon+dico_upgrades_roquette["rayon_aoe"]*10,degat_AOE=degat_AOE+dico_upgrades_roquette["degat"],duree_AOE=duree_AOE,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion)  ##Appelle le constructeur de la classe parente avec une couleur orange
         self.interval_tick_ms=interval_tick_ms
+        self.ricochet_actif=dico_upgrades_uniques["roquette"]["roquette_ricochet"]
+        self.nb_contacts_ricochet=0
+        self.nb_contacts_ricochet_max=3
+
+    def preparer_ricochet(self,liste_ennemis):
+        cibles_possibles=[ennemi for ennemi in liste_ennemis if ennemi not in self.ennemis_touches]
+        if not cibles_possibles:
+            return False
+        self.cible=min(cibles_possibles,key=lambda ennemi:(ennemi.x-self.x)**2+(ennemi.y-self.y)**2)
+        self.calculer_direction(self.cible.x,self.cible.y)
+        self.start_x,self.start_y=self.x,self.y
+        return True
+
 
 class projectile_mine(projectiles_general):
     """Classe des projectiles roquettes"""
@@ -975,7 +988,7 @@ def lancer_jeu(settings):
     aura_active=aura(width/4,1,sprite=aura_sprites,interval_tick_ms=500,vitesse_animation=0.1)  ##Crée une aura qui inflige des dégâts aux ennemis à proximité toutes les 500ms
     aura_active.nom="Aura Active"
     tourelle_active=tourelle(0,0,sprite_batiment=tourelle_sprites,sprite_balle=projectile_tourelle_sprite,vitesse_animation=0.1)  ##Crée une tourelle qui tire des projectiles de tourelle
-    type_armes=["stats",laser]   ##Liste des types d'armes
+    type_armes=["stats",laser,roquette]   ##Liste des types d'armes
     liste_armes=[laser,roquette,mine,aura_active,tourelle_active]   ##Liste des armes du joueur, utilisée pour le level up
     armes_possedees=["stats"]+(["laser"] if laser in type_armes else [])+(["roquette"] if roquette in type_armes else [])+(["mine"] if mine in type_armes else [])+(["aura"] if aura_active in type_armes else [])+(["tourelle"] if tourelle_active in type_armes else [])
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
@@ -1199,6 +1212,10 @@ def lancer_jeu(settings):
                         
             for proj in liste_projectiles[:]:
                 temps_ecoule = proj.update(liste_ennemis)
+                explosion_deja_creee = False
+                continuer_ricochet = False
+                roquette_ricochet_active = isinstance(proj, projectile_roquette) and proj.ricochet_actif
+
 
                 # 1. Détection collision
                 hit_ennemi = None
@@ -1212,6 +1229,10 @@ def lancer_jeu(settings):
                     ):
                         continue
 
+                    if roquette_ricochet_active and ennemi in proj.ennemis_touches:
+                        continue
+
+
                     hit_ennemi = ennemi
                     break
 
@@ -1219,19 +1240,47 @@ def lancer_jeu(settings):
                 if hit_ennemi:
                     # On capture si l'ennemi est mort (nécessite le 'return True' dans prendre_degats)
                     pv_joueur=min(pv_max_joueur,pv_joueur+dico_upgrades_stats["vol_de_vie"]*proj.degat)
+
                     if isinstance(proj,projectile_laser):
-                        proj.chain_lightning(hit_ennemi,liste_ennemis,liste_arcs) 
+                        proj.chain_lightning(hit_ennemi,liste_ennemis,liste_arcs)
                     mort = hit_ennemi.prendre_degats(proj.degat)
+
                     if isinstance(proj,projectile_laser) and dico_upgrades_uniques["laser"]["laser_ralentissant"]:
                         hit_ennemi.appliquer_slow(0.2,2500)
+
                     if isinstance(proj,projectile_laser) and dico_upgrades_uniques["laser"]["laser_perforant"]:
                         proj.ennemis_touches.append(hit_ennemi)
+
+                    if roquette_ricochet_active:
+                        proj.ennemis_touches.append(hit_ennemi)
+                        proj.nb_contacts_ricochet += 1
+                        if proj.aoe:
+                            aoe_zone = AOE(
+                                proj.x,
+                                proj.y,
+                                proj.aoe_rayon,
+                                proj.degat_AOE,
+                                proj.duree_AOE,
+                                interval_tick_ms=proj.interval_tick_ms,
+                                cible="ennemi",
+                                sprite_feu=proj.sprite_feu
+                            )
+                            liste_aoe.append(aoe_zone)
+                            liste_explosions.append(Explosion(proj.x, proj.y, proj.sprite_explosion,proj.aoe_rayon))
+                            explosion_deja_creee = True
+
+                        if (proj.nb_contacts_ricochet < proj.nb_contacts_ricochet_max
+                            and proj.preparer_ricochet(liste_ennemis)):
+                            continuer_ricochet = True
+
                     if mort:
                         xp += hit_ennemi.xp #J'avais oublie ca ;-;
+                trop_loin = proj.est_trop_loin()
 
                 # On ajoute une vérification pour éviter de supprimer deux fois (si hit + trop loin)
-                if hit_ennemi or proj.est_trop_loin() or temps_ecoule:
-                    if proj.aoe:
+                if hit_ennemi or trop_loin or temps_ecoule:
+                    doit_creer_explosion = proj.aoe and not explosion_deja_creee and (hit_ennemi or (not roquette_ricochet_active and (trop_loin or temps_ecoule)))
+                    if doit_creer_explosion:
                         # Création de l'AOE
                         aoe_zone = AOE(
                             proj.x,
@@ -1249,6 +1298,8 @@ def lancer_jeu(settings):
 
                     # On vérifie si le projectile est toujours dans la liste avant de remove
                     if proj in liste_projectiles:
+                        if continuer_ricochet:
+                            continue
                         if proj.est_trop_loin() or temps_ecoule:
                             liste_projectiles.remove(proj)
                         elif hit_ennemi and not (
