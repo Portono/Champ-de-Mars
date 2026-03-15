@@ -8,6 +8,7 @@ from Menu import *
 from Sounddesign import*
 from menu_pause import*
 from random_module import*
+from paths import data_path
 
 pygame.init()
 echelle_difficulte=0
@@ -46,7 +47,7 @@ black = (0, 0, 0)
 blue = (0, 0, 255)
 
 GAME_MUSIC_EVENT=pygame.USEREVENT+1
-GAME_MUSIC_TRACKS=["data/1-3.mp3","data/2-3.mp3", "data/3-3.mp3"]
+GAME_MUSIC_TRACKS=[data_path("1-3.mp3"),data_path("2-3.mp3"), data_path("3-3.mp3")]
 def ajouter_xp(g):
     global xp
     xp+=g
@@ -833,7 +834,7 @@ def lancer_jeu(settings):
     #reset_upgrades()
 
     #Chargement de la map
-    with open("data/Map_Jeu.json","r") as f:
+    with open(data_path("Map_Jeu.json"),"r") as f:
         map_data=json.load(f)
     
     zoom = width/512
@@ -893,11 +894,13 @@ def lancer_jeu(settings):
 
     ###Laser
     img=pygame.image.load('data/projectile_laser.png').convert_alpha()
+    img=pygame.image.load(data_path('projectile_laser.png')).convert_alpha()
     img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
     laser_sprite=img
 
     ###Roquette
     img=pygame.image.load('data/projectile_roquette.png').convert_alpha()
+    img=pygame.image.load(data_path('projectile_roquette.png')).convert_alpha()
     img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
     roquette_sprite=img
 
@@ -905,21 +908,25 @@ def lancer_jeu(settings):
     shrapnel_sprite=[]
     for i in range(1,4):
         img=pygame.image.load(f'data/Shrapnel({i}).png').convert_alpha()
+        img=pygame.image.load(data_path(f'Shrapnel({i}).png')).convert_alpha()
         img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
         shrapnel_sprite.append(img)
 
     ###Tourelle
     img=pygame.image.load('data/projectile_tourelle.png').convert_alpha()
+    img=pygame.image.load(data_path('projectile_tourelle.png')).convert_alpha()
     img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
     projectile_tourelle_sprite=img
 
     ###Mine
     projectile_mine_sprite=[]
     img=pygame.image.load(f'data/Landmine_desactive.png').convert_alpha()
+    img=pygame.image.load(data_path('Landmine_desactive.png')).convert_alpha()
     img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
     projectile_mine_sprite.append(img)
     for i in range(1,3):
         img=pygame.image.load(f'data/Landmine({i}).png').convert_alpha()
+        img=pygame.image.load(data_path(f'Landmine({i}).png')).convert_alpha()
         img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
         projectile_mine_sprite.append(img)
 
@@ -927,6 +934,7 @@ def lancer_jeu(settings):
     projectile_leure_sprite=[]
     for i in range(1,3):
         img=pygame.image.load(f'data/enemy_bomb({i}).png').convert_alpha()
+        img=pygame.image.load(data_path(f'enemy_bomb({i}).png')).convert_alpha()
         img=pygame.transform.scale(img,(width/35,int(img.get_height()/img.get_width()*width/35)))
         projectile_leure_sprite.append(img)
 
@@ -934,6 +942,7 @@ def lancer_jeu(settings):
     projectile_terminateur=[]
     for i in range(1,10):
         img=pygame.image.load(f"data/E_Shoot({i}).png").convert_alpha()
+        img=pygame.image.load(data_path(f"E_Shoot({i}).png")).convert_alpha()
         img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
         projectile_terminateur.append(img)
 
@@ -943,20 +952,24 @@ def lancer_jeu(settings):
     aura_sprites=[]
     for i in range(1,8):
         img=pygame.image.load(f"data/Aura({i}).png").convert_alpha()##on scale pas car la classe le fait
+        img=pygame.image.load(data_path(f"Aura({i}).png")).convert_alpha()##on scale pas car la classe le fait
         aura_sprites.append(img)
 
     ###Sprite feu roquette
     img=pygame.image.load("data/fire.png").convert_alpha()
+    img=pygame.image.load(data_path("Fire.png")).convert_alpha()
     img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
     sprite_feu_roquette=img
 
     ###Sprite feu mine
     img=pygame.image.load("data/fire.png").convert_alpha()
+    img=pygame.image.load(data_path("Fire.png")).convert_alpha()
     img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
     sprite_feu_mine=img
 
     ###Sprite feu Leure
     img=pygame.image.load("data/fire.png").convert_alpha()
+    img=pygame.image.load(data_path("Fire.png")).convert_alpha()
     img=pygame.transform.scale(img,(width/20,int(img.get_height()/img.get_width()*width/20)))
     sprite_feu_leure=img
 
@@ -966,6 +979,7 @@ def lancer_jeu(settings):
     sprite_explosion_roquette=[]
     for i in range(1,3):
         img=pygame.image.load(f"data/Explosion{i}.png").convert_alpha()
+        img=pygame.image.load(data_path(f"Explosion{i}.png")).convert_alpha()
         img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
         sprite_explosion_roquette.append(img)    
 
@@ -973,6 +987,7 @@ def lancer_jeu(settings):
     sprite_explosion_mine=[]
     for i in range(1,3):
         img=pygame.image.load(f"data/Explosion{i}.png").convert_alpha()
+        img=pygame.image.load(data_path(f"Explosion{i}.png")).convert_alpha()
         img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
         sprite_explosion_mine.append(img) 
     
@@ -980,6 +995,7 @@ def lancer_jeu(settings):
     sprite_explosion_leure=[]
     for i in range(1,3):
         img=pygame.image.load(f"data/Explosion{i}.png").convert_alpha()
+        img=pygame.image.load(data_path(f"Explosion{i}.png")).convert_alpha()
         img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
         sprite_explosion_leure.append(img) 
 
@@ -989,6 +1005,7 @@ def lancer_jeu(settings):
     image_marcel_liste=[]
     for i in range(1,7):
         image_marcel=pygame.image.load(f"data/Marcel({i}).png").convert_alpha()
+        image_marcel=pygame.image.load(data_path(f"Marcel({i}).png")).convert_alpha()
         image_marcel=pygame.transform.scale(image_marcel,(width/25,int(image_marcel.get_height()/image_marcel.get_width()*width/25)))
         image_marcel_liste.append(image_marcel)
     
@@ -996,6 +1013,7 @@ def lancer_jeu(settings):
     image_philippe_liste=[]
     for i in range(1,7):
         image_philippe=pygame.image.load(f"data/Philippe({i}).png").convert_alpha()
+        image_philippe=pygame.image.load(data_path(f"Philippe({i}).png")).convert_alpha()
         image_philippe=pygame.transform.scale(image_philippe,(width/13,int(image_philippe.get_height()/image_philippe.get_width()*width/13)))
         image_philippe_liste.append(image_philippe)
 
@@ -1003,6 +1021,7 @@ def lancer_jeu(settings):
     image_leure_liste=[]
     for i in range(1,7):
         image_leure=pygame.image.load(f"data/Leure({i}).png").convert_alpha()
+        image_leure=pygame.image.load(data_path(f"Leure({i}).png")).convert_alpha()
         image_leure=pygame.transform.scale(image_leure,(width/20,int(image_leure.get_height()/image_leure.get_width()*width/20)))
         image_leure_liste.append(image_leure)
 
@@ -1010,6 +1029,7 @@ def lancer_jeu(settings):
     image_majo_liste=[]
     for i in range(1,3):
         image_majo=pygame.image.load(f"data/Majo({i}).png").convert_alpha()
+        image_majo=pygame.image.load(data_path(f"Majo({i}).png")).convert_alpha()
         image_majo=pygame.transform.scale(image_majo,(width/20,int(image_majo.get_height()/image_majo.get_width()*width/20)))
         image_majo_liste.append(image_majo)
 
@@ -1017,6 +1037,7 @@ def lancer_jeu(settings):
     image_terminateur_liste=[]
     for i in range(1,8):
         image_terminateur=pygame.image.load(f"data/Terminateur({i}).png").convert_alpha()
+        image_terminateur=pygame.image.load(data_path(f"Terminateur({i}).png")).convert_alpha()
         image_terminateur=pygame.transform.scale(image_terminateur,(width/20,int(image_terminateur.get_height()/image_terminateur.get_width()*width/20)))
         image_terminateur_liste.append(image_terminateur)
 
@@ -1026,6 +1047,7 @@ def lancer_jeu(settings):
     tourelle_sprites=[]
     for i in range(1,5):
         img=pygame.image.load(f'data/Turret({i}).png').convert_alpha()
+        img=pygame.image.load(data_path(f'Turret({i}).png')).convert_alpha()
         img=pygame.transform.scale(img,(width/20,width/20))
         tourelle_sprites.append(img)
     
@@ -1036,11 +1058,13 @@ def lancer_jeu(settings):
     astro_front_sprites=[]
     for i in range(1,7):
         astro_front=pygame.image.load(f"data/AstroFront({i}).png").convert_alpha()
+        astro_front=pygame.image.load(data_path(f"AstroFront({i}).png")).convert_alpha()
         astro_front=pygame.transform.scale(astro_front,(width/20,int(astro_front.get_height()/astro_front.get_width()*width/20)))
         astro_front_sprites.append(astro_front)
     astro_back_sprites=[]
     for i in range(1,8):
         astro_back=pygame.image.load(f"data/AstroBack({i}).png").convert_alpha()
+        astro_back=pygame.image.load(data_path(f"AstroBack({i}).png")).convert_alpha()
         astro_back=pygame.transform.scale(astro_back,(width/20,int(astro_back.get_height()/astro_back.get_width()*width/20)))
         astro_back_sprites.append(astro_back)
 
@@ -1049,6 +1073,7 @@ def lancer_jeu(settings):
     arc_electrique_sprite=[]
     for i in range(1,4):
         img=pygame.image.load(f"data/ArcE({i}).png").convert_alpha() ## on resize pas car la fonction le fait
+        img=pygame.image.load(data_path(f"ArcE({i}).png")).convert_alpha() ## on resize pas car la fonction le fait
         arc_electrique_sprite.append(img)
 
     echelle_difficulte=0
