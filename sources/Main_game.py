@@ -37,6 +37,7 @@ sprite_feu_mine=None
 sprite_explosion_mine=None
 sprite_explosion_leure=[]
 projectile_terminateur=[]
+shrapnel_sprite=[]
 
 # Couleurs (importées de Menu)
 red = (255, 0, 0)
@@ -363,6 +364,28 @@ class projectile_roquette(projectiles_general):
         self.nb_contacts_ricochet=0
         self.nb_contacts_ricochet_max=3
 
+    def creer_shrapnels(self, cible_impact):
+        if not dico_upgrades_uniques["roquette"]["roquette_shrapnel"]:
+            return []
+
+        projectiles_shrapnels=[]
+        for decalage in (-30, 0, 30):
+            fragment = shrapnel(
+                self.x,
+                self.y,
+                width/90,
+                cible_impact,
+                angle_tir=self.angle+decalage,
+                sprite=shrapnel_sprite
+            )
+            decalage_spawn = max(12, width/80)
+            fragment.x += fragment.dir_x * decalage_spawn
+            fragment.y += fragment.dir_y * decalage_spawn
+            fragment.start_x, fragment.start_y = fragment.x, fragment.y
+            fragment.rect.center = (fragment.x, fragment.y)
+            projectiles_shrapnels.append(fragment)
+        return projectiles_shrapnels
+
     def preparer_ricochet(self,liste_ennemis):
         cibles_possibles=[ennemi for ennemi in liste_ennemis if ennemi not in self.ennemis_touches]
         if not cibles_possibles:
@@ -371,6 +394,8 @@ class projectile_roquette(projectiles_general):
         self.calculer_direction(self.cible.x,self.cible.y)
         self.start_x,self.start_y=self.x,self.y
         return True
+
+
 
 
 class projectile_mine(projectiles_general):
@@ -385,6 +410,18 @@ class projectile_mine(projectiles_general):
         if maintenant - self.temps_creation >= self.duree:
             return True 
         return False
+    
+class shrapnel(projectiles_general):
+    """Projectile secondaire déclenché par l'upgrade roquette_shrapnel"""
+    def __init__(self,x,y,vitesse,cible_initiale,angle_tir,sprite=None,degat=1,range=None):
+        if range is None:
+            range = width/3
+        super().__init__(x,y,vitesse,cible_initiale,homing=False,sprite_path=sprite,couleur=(255,200,100),degat=degat+dico_upgrades_roquette["degat"],range=range+dico_upgrades_roquette["portee"],aoe=False)
+        self.dir_x=math.cos(math.radians(angle_tir))
+        self.dir_y=-math.sin(math.radians(angle_tir))
+        self.angle=angle_tir
+
+
 
 class projectile_tourelle(projectiles_general):
     """Classe des projectiles de tourelle, qui sont plus faibles que les projectiles normaux pour ne pas rendre la tourelle trop puissante"""
@@ -737,7 +774,7 @@ class arc_electrique:
         screen.blit(sprite,rect)
 
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette,image_majo_liste,image_terminateur_liste,aura_sprites,arc_electrique_sprite,liste_arcs,projectile_terminateur
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette,image_majo_liste,image_terminateur_liste,aura_sprites,arc_electrique_sprite,liste_arcs,projectile_terminateur,shrapnel_sprite
     if settings is None:
         settings={"width":width,"height":height,"fullscreen":fullscreen,"sound_volume":50,"play":True}
 
@@ -813,6 +850,13 @@ def lancer_jeu(settings):
     img=pygame.image.load('data/projectile_roquette.png').convert_alpha()
     img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
     roquette_sprite=img
+
+    ###Shrapnel
+    shrapnel_sprite=[]
+    for i in range(1,4):
+        img=pygame.image.load(f'data/Shrapnel({i}).png').convert_alpha()
+        img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
+        shrapnel_sprite.append(img)
 
     ###Tourelle
     img=pygame.image.load('data/projectile_tourelle.png').convert_alpha()
@@ -1273,6 +1317,10 @@ def lancer_jeu(settings):
                         if (proj.nb_contacts_ricochet < proj.nb_contacts_ricochet_max
                             and proj.preparer_ricochet(liste_ennemis)):
                             continuer_ricochet = True
+
+                    if isinstance(proj,projectile_roquette) and dico_upgrades_uniques["roquette"]["roquette_shrapnel"]:
+                        nouveaux_shrapnels = proj.creer_shrapnels(hit_ennemi)
+                        liste_projectiles.extend(nouveaux_shrapnels)
 
                     if mort:
                         xp += hit_ennemi.xp #J'avais oublie ca ;-;
