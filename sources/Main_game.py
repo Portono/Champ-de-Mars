@@ -162,7 +162,8 @@ class ennemi_main:
                                                       sprite_path=sprite_choisi,
                                                       duree_AOE=self.arme.duree_AOE,
                                                       sprite_feu=self.arme.sprite_feu,
-                                                      sprite_explosion=self.arme.sprite_explosion)  ##Crée un nouveau projectile en utilisant la classe de l'arme de l'ennemi
+                                                      sprite_explosion=self.arme.sprite_explosion,
+                                                      proprietaire=self)  ##Crée un nouveau projectile en utilisant la classe de l'arme de l'ennemi
                 liste_projectiles_ennemis.append(nouveau_projectile)
     def prendre_degats(self, degats_infliges):
         self.hp -= degats_infliges
@@ -218,7 +219,7 @@ class Philippe(ennemi_main):
             
 class projectiles_general:
     """Classe principale des projectiles"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,couleur=(0,255,0),degat=1,range=10,aoe=False,aoe_rayon=None,degat_AOE=0,duree_AOE=0,duree=None,interval_tick_ms=500,sprite_feu=None,sprite_explosion=None,vitesse_animation=0):
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,couleur=(0,255,0),degat=1,range=10,aoe=False,aoe_rayon=None,degat_AOE=0,duree_AOE=0,duree=None,interval_tick_ms=500,sprite_feu=None,sprite_explosion=None,vitesse_animation=0,proprietaire=None):
         self.x=x
         self.y=y
         self.start_x=x
@@ -241,6 +242,7 @@ class projectiles_general:
         self.vitesse_animation=vitesse_animation
         self.animation_index=0
         self.ennemis_touches=[]
+        self.proprietaire=proprietaire
         if sprite_feu!=None:
             self.sprite_feu=sprite_feu
         else:
@@ -467,12 +469,12 @@ class projectile_tourelle(projectiles_general):
 
 class projectile_ennemi(projectiles_general):
     """Classe des projectiles ennemis"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=projectile_terminateur,degat=7,range=10,aoe=False,aoe_rayon=None,degat_AOE=0,duree_AOE=0,sprite_feu=None,sprite_explosion=None):
-        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(0,0,0),degat=degat+echelle_difficulte,range=range+echelle_difficulte*10,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,duree_AOE=duree_AOE,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion)  ##Appelle le constructeur de la classe parente avec une couleur noire
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=projectile_terminateur,degat=7,range=10,aoe=False,aoe_rayon=None,degat_AOE=0,duree_AOE=0,sprite_feu=None,sprite_explosion=None,proprietaire=None):
+        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(0,0,0),degat=degat+echelle_difficulte,range=range+echelle_difficulte*10,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,duree_AOE=duree_AOE,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion,proprietaire=proprietaire)  ##Appelle le constructeur de la classe parente avec une couleur noire
 
 class projectile_leure(projectiles_general):
     """Classe des projectiles de Leure"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=projectile_leure_sprite,degat=20,range=10,aoe=True,aoe_rayon=width/20,degat_AOE=5,duree_AOE=2000,sprite_feu=sprite_feu_leure,interval_tick_ms=500,sprite_explosion=sprite_explosion_leure,vitesse_animation=0.1):
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=projectile_leure_sprite,degat=20,range=10,aoe=True,aoe_rayon=width/20,degat_AOE=5,duree_AOE=2000,sprite_feu=sprite_feu_leure,interval_tick_ms=500,sprite_explosion=sprite_explosion_leure,vitesse_animation=0.1,proprietaire=None):
         super().__init__(
                 x,
                 y,
@@ -490,7 +492,8 @@ class projectile_leure(projectiles_general):
                 interval_tick_ms=interval_tick_ms,
                 sprite_feu=sprite_feu,
                 sprite_explosion=sprite_explosion,
-                vitesse_animation=vitesse_animation
+                vitesse_animation=vitesse_animation,
+                proprietaire=proprietaire
                         )
 class weapon_main:
     """Classe principale des armes"""
@@ -562,7 +565,7 @@ class Explosion:
         screen.blit(image,rect)
 
 class AOE:
-    def __init__(self,x,y,rayon,degat_par_tick,duree_ms,interval_tick_ms=500,sprite_feu=None,cible="joueur"):
+    def __init__(self,x,y,rayon,degat_par_tick,duree_ms,interval_tick_ms=500,sprite_feu=None,cible="joueur",proprietaire=None):
         self.x=x
         self.y=y
         self.rayon=rayon
@@ -571,6 +574,7 @@ class AOE:
         self.duree=duree_ms  ##Durée totale de l'AOE en millisecondes
         self.interval_tick=interval_tick_ms
         self.sprite=sprite_feu
+        self.proprietaire=proprietaire
 
         self.temps_creation=pygame.time.get_ticks()
         self.dernier_tick=self.temps_creation
@@ -582,7 +586,7 @@ class AOE:
             self.sprite=pygame.transform.scale(self.sprite,(taille,taille))
             self.rect=self.sprite.get_rect(center=(self.x,self.y))
 
-    def update(self, liste_ennemis, player_rect=None, xp_callback=None): 
+    def update(self, liste_ennemis, player_rect=None, xp_callback=None, aura_active=None, aura_affaiblissante=False, player_x=None, player_y=None): 
         maintenant = pygame.time.get_ticks()
         
         if maintenant - self.temps_creation >= self.duree:
@@ -595,7 +599,10 @@ class AOE:
                 # On calcule la distance entre le centre de l'AOE et le centre du joueur
                 if math.hypot(self.x - player_rect.centerx, self.y - player_rect.centery) <= self.rayon and not random.randint(1,11)<=dico_upgrades_stats["esquive"]:
                     global pv_joueur
-                    pv_joueur -= self.degat  # L'AOE inflige des dégâts au joueur
+                    reduction=1
+                    if aura_affaiblissante and aura_active and aura_active.ennemi_dans_aura(self.proprietaire,player_x,player_y):
+                        reduction=0.5
+                    pv_joueur-=self.degat*reduction
                     Soundhit.play()
             
             # SI LA CIBLE EST UN ENNEMI
@@ -667,9 +674,15 @@ class aura:
                 if dist <= self.rayon:
 
                     mort = ennemi.prendre_degats(self.degat)
+                    global pv_joueur
                     pv_joueur=min(pv_max_joueur,pv_joueur+dico_upgrades_stats["vol_de_vie"]*self.degat)
                     if mort and xp_callback:
                         xp_callback(ennemi.xp)
+    
+    def ennemi_dans_aura(self,ennemi,player_x,player_y):
+        if ennemi is None:
+            return False
+        return math.hypot(ennemi.x - player_x, ennemi.y - player_y <= self.rayon)
 
 
     def dessiner(self, screen, player_x, player_y, offset_x, offset_y):
@@ -1073,7 +1086,7 @@ def lancer_jeu(settings):
     aura_active=aura(width/4,1,sprite=aura_sprites,interval_tick_ms=500,vitesse_animation=0.1)  ##Crée une aura qui inflige des dégâts aux ennemis à proximité toutes les 500ms
     aura_active.nom="Aura Active"
     tourelle_active=tourelle(0,0,sprite_batiment=tourelle_sprites,sprite_balle=projectile_tourelle_sprite,vitesse_animation=0.1)  ##Crée une tourelle qui tire des projectiles de tourelle
-    type_armes=["stats",laser,mine]   ##Liste des types d'armes
+    type_armes=["stats",laser,aura_active]   ##Liste des types d'armes
     liste_armes=[laser,roquette,mine,aura_active,tourelle_active]   ##Liste des armes du joueur, utilisée pour le level up
     armes_possedees=["stats"]+(["laser"] if laser in type_armes else [])+(["roquette"] if roquette in type_armes else [])+(["mine"] if mine in type_armes else [])+(["aura"] if aura_active in type_armes else [])+(["tourelle"] if tourelle_active in type_armes else [])
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
@@ -1436,7 +1449,10 @@ def lancer_jeu(settings):
                 aura_active.update(player_x, player_y, liste_ennemis, xp_callback=ajouter_xp)
                 aura_active.dessiner(screen, player_x, player_y, offset_x, offset_y)
 
-
+            aura_affaiblissante_active = (
+                aura_active in type_armes
+                and dico_upgrades_uniques["aura"].get("aura_affaiblissante", False)
+            )
 
             # Mettre à jour les projectiles des ennemis
             for proj in liste_projectiles_ennemis[:]:
@@ -1447,7 +1463,8 @@ def lancer_jeu(settings):
                 # Collision avec les tourelles
                 for t in liste_tourelles[:]:
                     if proj.rect.colliderect(t.colliderect):
-                        t.hp -= proj.degat
+                        reduction=0.5 if aura_affaiblissante_active and aura_active.ennemi_dans_aura(proj.proprietaire, player_x, player_y) else 1
+                        t.hp-=proj.degat*reduction
                         impact = True
                         if t.hp<=0 and t in liste_tourelles:
                             liste_tourelles.remove(t)
@@ -1456,7 +1473,8 @@ def lancer_jeu(settings):
                 # Collision avec le joueur
                 if not impact and proj.rect.colliderect(player_real_rect):
                     if not random.randint(1,11)<=dico_upgrades_stats["esquive"]:    ##Pour l'esquive
-                        pv_joueur -= proj.degat
+                        reduction=0.5 if aura_affaiblissante_active and aura_active.ennemi_dans_aura(proj.proprietaire, player_x, player_y) else 1
+                        pv_joueur -= proj.degat*reduction
                         Soundhit.play()
                         impact = True
 
@@ -1471,7 +1489,7 @@ def lancer_jeu(settings):
                         liste_explosions.append(explosion)
                         aoe_zone = AOE(
                             proj.x, proj.y, proj.aoe_rayon, proj.degat_AOE, proj.duree_AOE,
-                            interval_tick_ms=proj.interval_tick_ms, cible="joueur", sprite_feu=proj.sprite_feu
+                            interval_tick_ms=proj.interval_tick_ms, cible="joueur", sprite_feu=proj.sprite_feu, proprietaire=proj.proprietaire
                         )
                         liste_aoe.append(aoe_zone)
 
@@ -1482,7 +1500,8 @@ def lancer_jeu(settings):
             for ennemi in liste_ennemis[:]:
                 if ennemi.rect.colliderect(player_real_rect):
                     if not random.randint(1,11)<=dico_upgrades_stats["esquive"]:
-                        pv_joueur -= ennemi.degat
+                        reduction=0.5 if aura_affaiblissante_active and aura_active.ennemi_dans_aura(proj.proprietaire, player_x, player_y) else 1
+                        pv_joueur -= ennemi.degat*reduction
                         Soundhit.play()
                     liste_ennemis.remove(ennemi)
 
@@ -1490,7 +1509,8 @@ def lancer_jeu(settings):
                 for t in liste_tourelles[:]:
                     if ennemi.rect.colliderect(t.colliderect):
                         if maintenant-ennemi.dernier_coup>=attack_delay_ennemi:
-                            t.hp-=ennemi.degat
+                            reduction=0.5 if aura_affaiblissante_active and aura_active.ennemi_dans_aura(proj.proprietaire, player_x, player_y) else 1
+                            t.hp-=ennemi.degat*reduction
                             if t.hp<=0 and t in liste_tourelles:
                                 liste_tourelles.remove(t)
                             ennemi.dernier_coup=maintenant
@@ -1534,7 +1554,7 @@ def lancer_jeu(settings):
             if aoe.cible == "ennemi":
                 aoe.update(liste_ennemis)
             else:
-                aoe.update([],player_rect=player_real_rect) 
+                aoe.update([],player_rect=player_real_rect,aura_active=aura_active,aura_affaiblissante=aura_affaiblissante_active,player_x=player_x,player_y=player_y) 
 
             aoe.dessiner(screen, offset_x, offset_y)
 
