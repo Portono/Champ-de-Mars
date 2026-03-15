@@ -28,3 +28,31 @@ Exemples :
 **8. save_load :**
 
 **9. paths.py :**
+
+# data
+
+**1. .png :**
+
+Les : "(1)" ou avec d'autres nombres sont là pour programmer les animations.
+
+Ce sont pour les sprites :
+- des personnages
+- pour certaines upgrades (comme l'arc électrique)
+- le fond d'écran du menu
+
+**2 .ttf :**
+
+Le format pour les 2 polices d'écritures utilisés dans le jeu (font.ttf pour quasi tout et fontgameover.ttf juste pour l'écran de game over).
+
+**3. .mp3 :**
+
+Pour les musiques et les sons présents dans le jeu.
+Les musiques : 1-3, 2-3 et 3-3 sont les 3 en rotation aléatoire pour Main_game.
+
+**4. .json :**
+
+Le format pour la carte de Mars avec la base.
+
+**5. .pixil :**
+
+
