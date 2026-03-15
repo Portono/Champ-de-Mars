@@ -20,7 +20,7 @@ Si vous voyez ce projet depuis une autre plateforme, nous vous recommandons de v
 
 Ce qui est nécessaire pour exécuter le projet :
 
-* **Python 3**
+* **Python 3.13**
 * La bibliothèque **pygame**
 
 Installation de pygame :
