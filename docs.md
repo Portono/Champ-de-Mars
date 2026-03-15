@@ -48,7 +48,7 @@ Le format pour les 2 polices d'écritures utilisés dans le jeu (ex : fontgameov
 
 **3. .mp3 :**
 
-Pour les musiques et les sons présents dans le jeu. /n
+Pour les musiques et les sons présents dans le jeu.  
 Les musiques : 1-3, 2-3 et 3-3 sont les 3 en rotation aléatoire pour Main_game.
 
 **4. .json :**
@@ -57,5 +57,5 @@ Le format pour la carte de Mars avec la base.
 
 **5. .pixil :**
 
-Le format utilisé pour ouvrir les sprites dans le logiciel "pixilart". /n
+Le format utilisé pour ouvrir les sprites dans le logiciel "pixilart".  
 Il n'est pas important pour le jeu, c'est juste pour changer certain sprites importants.
