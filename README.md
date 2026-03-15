@@ -34,7 +34,7 @@ et
 pip install pygame_widgets
 ```
 
-ou :
+ou alors:
 
 ```
 pip install -r requirements.txt
