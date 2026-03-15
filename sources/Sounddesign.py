@@ -1,9 +1,11 @@
 import pygame
+from paths import data_path
 
 pygame.mixer.init()
 
-Soundhit=pygame.mixer.Sound("data/Hit.mp3")
-Sounddeath=pygame.mixer.Sound("data/Death.mp3")
+Soundhit=pygame.mixer.Sound(data_path("Hit.mp3"))
+Sounddeath=pygame.mixer.Sound(data_path("Death.mp3"))
+
 
 base_sound_volume=0.5
 
