@@ -8,9 +8,11 @@ Pour l'explication de la structuration du projet
 
 C'est là où est codé le jeu principal, là où tout est assemblé.
 Exemples : 
+
 - Les déplacements du joueur
 - Les sprites et animations des personnages
 - La carte du jeu
+  
 *à changer, je sais pas comment expliquer le main_game*
 
 **2. Menu.py :**
@@ -55,4 +57,5 @@ Le format pour la carte de Mars avec la base.
 
 **5. .pixil :**
 
-
+Le format utilisé pour ouvrir les sprites dans le logiciel "pixilart".
+Il n'est pas important pour le jeu, c'est juste pour changer certain sprites importants.
