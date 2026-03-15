@@ -91,6 +91,11 @@ Version actuelle : **1.0**
 
 # Auteurs
 
+**Alias**
+*Evan Miniscloux = Portono
+*Evan Berthelin  = Enma-EB
+*Mael Barbaro    = Oltorc/Kolkien
+
 **Développeurs :**
 
 * Evan Miniscloux
