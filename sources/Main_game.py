@@ -403,13 +403,50 @@ class projectile_mine(projectiles_general):
     def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite=projectile_mine_sprite,degat=2,range=math.inf,aoe=True,aoe_rayon=width/10,degat_AOE=1,duree_AOE=333,duree=5000,interval_tick_ms=500,sprite_feu=sprite_feu_mine,sprite_explosion=sprite_explosion_mine,vitesse_animation=0.1):
         super().__init__(x,y,0,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+dico_upgrades_mine["degat"],range=range,aoe=aoe,aoe_rayon=aoe_rayon+dico_upgrades_mine["rayon_aoe"]*10,degat_AOE=degat_AOE+dico_upgrades_mine["degat"],duree_AOE=duree_AOE+dico_upgrades_mine["duree_aoe"]*10,duree=duree+dico_upgrades_mine["duree_vie"]*100,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion,vitesse_animation=vitesse_animation)  ##Appelle le constructeur de la classe parente avec une couleur orange
         self.interval_tick_ms=interval_tick_ms
+        self.double_vie_active=dico_upgrades_uniques["mine"]["mine_double_vie"]
+        self.charges_restantes=2 if self.double_vie_active else 1
+        self.en_recharge=False
+        self.delai_reactivation_ms=1000
+        self.temps_reactivation=0
+
+    def est_active(self):
+        return not self.en_recharge
+
+    def declencher_apres_explosion(self):
+        self.charges_restantes -= 1
+        if self.double_vie_active and self.charges_restantes>0:
+            self.en_recharge=True
+            self.temps_reactivation=pygame.time.get_ticks()+self.delai_reactivation_ms
+            return True
+        return False
 
     def update(self, liste_ennemis, player_pos=None):
         maintenant = pygame.time.get_ticks()
+        if self.en_recharge and maintenant>=self.temps_reactivation:
+            self.en_recharge=False
+
         # La mine renvoie True UNIQUEMENT si le temps est écoulé
         if maintenant - self.temps_creation >= self.duree:
             return True 
         return False
+
+    def dessiner(self,screen,offset_x,offset_y):
+        if isinstance(self.image,list) and self.image:
+            if self.en_recharge and len(self.image)>0:
+                image=self.image[0]
+            else:
+                frame_debut=1 if len(self.image)>1 else 0
+                nb_frames=max(1,len(self.image)-frame_debut)
+                self.animation_index += self.vitesse_animation
+                index=frame_debut + (int(self.animation_index) % nb_frames)
+                image=self.image[index]
+
+            rect_image=image.get_rect(center=(self.rect.centerx-offset_x,self.rect.centery-offset_y))
+            screen.blit(image,rect_image)
+        else:
+            super().dessiner(screen,offset_x,offset_y)
+
+
     
 class shrapnel(projectiles_general):
     """Projectile secondaire déclenché par l'upgrade roquette_shrapnel"""
@@ -865,6 +902,9 @@ def lancer_jeu(settings):
 
     ###Mine
     projectile_mine_sprite=[]
+    img=pygame.image.load(f'data/Landmine_desactive.png').convert_alpha()
+    img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
+    projectile_mine_sprite.append(img)
     for i in range(1,3):
         img=pygame.image.load(f'data/Landmine({i}).png').convert_alpha()
         img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
@@ -1289,6 +1329,8 @@ def lancer_jeu(settings):
                 # 1. Détection collision
                 hit_ennemi = None
                 for ennemi in liste_ennemis:
+                    if isinstance(proj, projectile_mine) and not proj.est_active():
+                        continue
                     if not proj.rect.colliderect(ennemi.rect):
                         continue
 
@@ -1374,6 +1416,11 @@ def lancer_jeu(settings):
                     # On vérifie si le projectile est toujours dans la liste avant de remove
                     if proj in liste_projectiles:
                         if continuer_ricochet:
+                            continue
+                        if isinstance(proj, projectile_mine) and hit_ennemi:
+                            if proj.declencher_apres_explosion():
+                                continue
+                            liste_projectiles.remove(proj)
                             continue
                         if proj.est_trop_loin() or temps_ecoule:
                             liste_projectiles.remove(proj)
