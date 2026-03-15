@@ -923,8 +923,17 @@ def lancer_jeu(settings):
     font=pygame.font.Font(None,int(width/25))
 
     ###Chargement de Astro(joueur)
-    astro=pygame.image.load("data/Astro.png").convert_alpha()
-    astro=pygame.transform.scale(astro,(width/20,int(astro.get_height()/astro.get_width()*width/20)))
+    astro_front_sprites=[]
+    for i in range(1,7):
+        astro_front=pygame.image.load(f"data/AstroFront({i}).png").convert_alpha()
+        astro_front=pygame.transform.scale(astro_front,(width/20,int(astro_front.get_height()/astro_front.get_width()*width/20)))
+        astro_front_sprites.append(astro_front)
+    astro_back_sprites=[]
+    for i in range(1,8):
+        astro_back=pygame.image.load(f"data/AstroBack({i}).png").convert_alpha()
+        astro_back=pygame.transform.scale(astro_back,(width/20,int(astro_back.get_height()/astro_back.get_width()*width/20)))
+        astro_back_sprites.append(astro_back)
+
 
     ##Chargement de l'arc electrique
     arc_electrique_sprite=[]
@@ -946,6 +955,10 @@ def lancer_jeu(settings):
     en_jeu=True
     #Variables de jeu
     player_x, player_y = 0, 0 # Position réelle du joueur dans le monde
+    astro_animation_index=0
+    astro_animation_vitesse=0.1
+    astro_sprite_actuel=astro_front_sprites[0]
+
     vitesse_joueur = width/300+dico_upgrades_stats["vitesse"]*20  ##Vitesse de deplacement du joueur
     couleur_joueur = (255, 0, 0)
     types_ennemis = [Majo, Marcel,Terminateur,Philippe,Leure]  ##Liste des types d'ennemis
@@ -992,7 +1005,6 @@ def lancer_jeu(settings):
     maintenant=0
     liste_aoe=[]
     liste_arcs=[]
-    player_x,player_y=0,0
     taille_base = int(TILE_SIZE * zoom)
     # On ajoute 1 pixel pour l'overlapping
     taille_overlap = taille_base + 1 
@@ -1029,7 +1041,7 @@ def lancer_jeu(settings):
                         if ennemi.arme:
                             ennemi.arme.compenser_pause(duree_pause)  ##Décale les temps de tir des armes des ennemis pour compenser la pause
                             
-        player_real_rect = pygame.Rect(0,0,astro.get_width()/1.4,astro.get_height())
+        player_real_rect = pygame.Rect(0,0,astro_front_sprites[0].get_width()/1.4,astro_front_sprites[0].get_height())
         player_real_rect.center = (player_x, player_y)
         #Mouvement et logique du joueur
         if True:
@@ -1037,12 +1049,22 @@ def lancer_jeu(settings):
             touches = pygame.key.get_pressed()
             if touches[pygame.K_d]:
                 player_x += vitesse_joueur
+                astro_animation_index += astro_animation_vitesse
+                astro_sprite_actuel = astro_front_sprites[int(astro_animation_index) % len(astro_front_sprites)] if direction=="bas" else astro_back_sprites[int(astro_animation_index) % len(astro_back_sprites)]
             if touches[pygame.K_q] or touches[pygame.K_a]:
                 player_x -= vitesse_joueur
+                astro_animation_index += astro_animation_vitesse
+                astro_sprite_actuel = astro_front_sprites[int(astro_animation_index) % len(astro_front_sprites)] if direction=="bas" else astro_back_sprites[int(astro_animation_index) % len(astro_back_sprites)]
             if touches[pygame.K_s]:
                 player_y += vitesse_joueur
+                direction="bas"
+                astro_animation_index += astro_animation_vitesse
+                astro_sprite_actuel = astro_front_sprites[int(astro_animation_index) % len(astro_front_sprites)]
             if touches[pygame.K_z] or touches[pygame.K_w]:
                 player_y -= vitesse_joueur
+                direction="haut"
+                astro_animation_index += astro_animation_vitesse
+                astro_sprite_actuel = astro_back_sprites[int(astro_animation_index) % len(astro_back_sprites)]
             if touches[pygame.K_e] and niveau>=1:
                 temps_debut_pause = pygame.time.get_ticks()
 
@@ -1336,9 +1358,9 @@ def lancer_jeu(settings):
             ennemi.dessiner(screen, offset_x, offset_y)
             
         #Dessine le joueur
-        astro_rect=astro.get_rect()
+        astro_rect=astro_front_sprites[0].get_rect()
         astro_rect.center=(width/2,height/2)
-        screen.blit(astro,astro_rect)
+        screen.blit(astro_sprite_actuel,astro_rect)
 
         #Dessiner les projectiles du joueur
         for proj in liste_projectiles[:]:
