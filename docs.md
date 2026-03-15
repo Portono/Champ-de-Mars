@@ -2,6 +2,7 @@
 
 Pour l'explication de la structuration du projet
 *aider moi à expliquer tout ça*
+
 # Sources :
 
 **1. Main_game.py :**
@@ -31,7 +32,7 @@ Exemples :
 
 **9. paths.py :**
 
-# data
+# Data :
 
 **1. .png :**
 
