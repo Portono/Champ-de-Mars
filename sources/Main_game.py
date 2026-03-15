@@ -704,6 +704,8 @@ class aura:
         self.temps_dernier_tick = pygame.time.get_ticks()
 
         self.ancien_rayon = -1
+        self.ancien_rayon_tourelle=[]
+        self.sprites_scales_tourelle = []
 
 
     def update(self, player_x, player_y, liste_ennemis, xp_callback=None):
@@ -741,34 +743,36 @@ class aura:
         return math.hypot(ennemi.x - player_x, ennemi.y - player_y) <= self.rayon
 
 
-    def dessiner(self, screen, player_x, player_y, offset_x, offset_y):
+    def dessiner(self, screen, player_x, player_y, offset_x, offset_y, rayon_override=None):
+        rayon_dessin = rayon_override if rayon_override is not None else self.rayon
 
-        if self.rayon != self.ancien_rayon:
+        if rayon_override is not None:
+            # stockage séparé pour les tourelles sinon bye bye les fps
+            if rayon_dessin != self.ancien_rayon_tourelle:
+                diametre = int(rayon_dessin * 2)
+                self.sprites_scales_tourelle = [
+                    pygame.transform.scale(sprite, (diametre, diametre))
+                    for sprite in self.sprites_originaux
+                ]
+                self.ancien_rayon_tourelle = rayon_dessin
+            sprites_a_utiliser = self.sprites_scales_tourelle
+        else:
+            # Cache normal pour le joueur
+            if rayon_dessin != self.ancien_rayon:
+                diametre = int(rayon_dessin * 2)
+                self.sprites_scales = [
+                    pygame.transform.scale(sprite, (diametre, diametre))
+                    for sprite in self.sprites_originaux
+                ]
+                self.ancien_rayon = rayon_dessin
+            sprites_a_utiliser = self.sprites_scales
 
-            diametre = int(self.rayon * 2)
-
-            self.sprites_scales = [
-                pygame.transform.scale(sprite, (diametre, diametre))
-                for sprite in self.sprites_originaux
-            ]
-
-            self.ancien_rayon = self.rayon
-
-        # animation
         self.frame_index += self.vitesse_animation
-
-        if self.frame_index >= len(self.sprites_scales):
+        if self.frame_index >= len(sprites_a_utiliser):
             self.frame_index = 0
 
-        sprite = self.sprites_scales[int(self.frame_index)]
-
-        screen.blit(
-            sprite,
-            (
-                player_x - self.rayon - offset_x,
-                player_y - self.rayon - offset_y
-            )
-        )
+        sprite = sprites_a_utiliser[int(self.frame_index)]
+        screen.blit(sprite, (player_x - rayon_dessin - offset_x, player_y - rayon_dessin - offset_y))
 
 class tourelle:
     def __init__(self, x, y, sprite_batiment=None, sprite_balle=None, delai_spawn=10000,vitesse_animation=0.1):
@@ -880,7 +884,7 @@ class arc_electrique:
         screen.blit(sprite,rect)
 
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette,image_majo_liste,image_terminateur_liste,aura_sprites,arc_electrique_sprite,liste_arcs,projectile_terminateur,shrapnel_sprite,sprites_poison_mine
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette,image_majo_liste,image_terminateur_liste,aura_sprites,arc_electrique_sprite,liste_arcs,projectile_terminateur,shrapnel_sprite,sprites_poison_mine,sprite_explosion_tourelle
     if settings is None:
         settings={"width":width,"height":height,"fullscreen":fullscreen,"sound_volume":50,"play":True}
 
@@ -1028,22 +1032,25 @@ def lancer_jeu(settings):
     sprite_explosion_roquette=[]
     for i in range(1,3):
         img=pygame.image.load(data_path(f"Explosion{i}.png")).convert_alpha()
-        img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
         sprite_explosion_roquette.append(img)    
 
     ###Sprite de l'explosion de la mine
     sprite_explosion_mine=[]
     for i in range(1,3):
         img=pygame.image.load(data_path(f"Explosion{i}.png")).convert_alpha()
-        img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
         sprite_explosion_mine.append(img) 
     
     ###Sprite de l'explosion des projectiles de Leure
     sprite_explosion_leure=[]
     for i in range(1,3):
         img=pygame.image.load(data_path(f"Explosion{i}.png")).convert_alpha()
-        img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
         sprite_explosion_leure.append(img) 
+    
+    ###Sprite de l'explosion de la tourelel si upgrade
+    sprite_explosion_tourelle=[]
+    for i in range(1,3):
+        img=pygame.image.load(data_path(f"Explosion{i}.png")).convert_alpha()
+        sprite_explosion_tourelle.append(img) 
 
     ##Chargement des sprites des ennemis
 
@@ -1148,7 +1155,7 @@ def lancer_jeu(settings):
     aura_active=aura(width/4,1,sprite=aura_sprites,interval_tick_ms=500,vitesse_animation=0.1)  ##Crée une aura qui inflige des dégâts aux ennemis à proximité toutes les 500ms
     aura_active.nom="Aura Active"
     tourelle_active=tourelle(0,0,sprite_batiment=tourelle_sprites,sprite_balle=projectile_tourelle_sprite,vitesse_animation=0.1)  ##Crée une tourelle qui tire des projectiles de tourelle
-    type_armes=["stats",laser,mine]   ##Liste des types d'armes
+    type_armes=["stats",laser,tourelle_active,aura_active]   ##Liste des types d'armes
     liste_armes=[laser,roquette,mine,aura_active,tourelle_active]   ##Liste des armes du joueur, utilisée pour le level up
     armes_possedees=["stats"]+(["laser"] if laser in type_armes else [])+(["roquette"] if roquette in type_armes else [])+(["mine"] if mine in type_armes else [])+(["aura"] if aura_active in type_armes else [])+(["tourelle"] if tourelle_active in type_armes else [])
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
@@ -1319,7 +1326,18 @@ def lancer_jeu(settings):
             #g du le decale la pour fix un bug
             for tourelles in liste_tourelles:
                 tourelles.update(liste_ennemis,liste_projectiles)
-                tourelles.dessiner(screen,offset_x,offset_y)
+
+                if dico_upgrades_uniques["tourelle"]["tourelle_aoe_defensive"]:
+                    rayon_aura_tourelle = (width/4 + dico_upgrades_aura["portee"] * (width/40)) / 2
+                    for ennemi in liste_ennemis[:]:
+                        dist = math.hypot(ennemi.x - tourelles.x, ennemi.y - tourelles.y)
+                        if dist <= rayon_aura_tourelle:
+                            mort = ennemi.prendre_degats(1 + dico_upgrades_aura["degat"])
+                            if mort:
+                                ajouter_xp(ennemi.xp)
+                    aura_active.dessiner(screen, tourelles.x, tourelles.y, offset_x, offset_y,rayon_override=rayon_aura_tourelle)
+
+                tourelles.dessiner(screen, offset_x, offset_y)
 
             # Gérer le spawn des ennemis
             for classe in types_ennemis:
@@ -1540,6 +1558,7 @@ def lancer_jeu(settings):
                             liste_tourelles.remove(t)
                             if dico_upgrades_uniques["tourelle"]["tourelle_explosive"]:
                                 liste_aoe.append(AOE(t.x, t.y, width/5, 10+dico_upgrades_tourelle["degat"], 500, cible="ennemi"))
+                                liste_explosions.append(Explosion(t.x, t.y, sprite_explosion_tourelle, width/5))
                         break
 
                 # Collision avec le joueur
@@ -1587,6 +1606,7 @@ def lancer_jeu(settings):
                                 liste_tourelles.remove(t)
                                 if dico_upgrades_uniques["tourelle"]["tourelle_explosive"]:
                                     liste_aoe.append(AOE(t.x, t.y, width/5,10+dico_upgrades_tourelle["degat"], 500, cible="ennemi"))
+                                    liste_explosions.append(Explosion(t.x, t.y, sprite_explosion_tourelle, width/5))
                             ennemi.dernier_coup=maintenant
 
         maintenant_fragmentations=pygame.time.get_ticks()
