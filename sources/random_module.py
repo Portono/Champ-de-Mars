@@ -17,20 +17,20 @@ dico_upgrades_stats={
 
 #------------------Upgrades armes uniques----------------------------------------
 dico_upgrades_uniques={
-                "laser":{"laser_electrique":True,                   ##Fait
+                "laser":{"laser_electrique":False,                  ##Fait
                          "laser_ralentissant":False,                ##Fait
-                         "laser_perforant":True                     ##Fait
+                         "laser_perforant":False                    ##Fait
                          },
-                "roquette":{"roquette_shrapnel":False,
-                            "roquette_enflammee":False,
+                "roquette":{"roquette_shrapnel":False,               ##Fait
+                            "roquette_enflammee":False,              ##Fait
                             "roquette_ricochet":False               ##Fait
                             },
-                "mine":{"mine_empoisonnee":False,
-                        "mine_fragmentation":False,
-                        "mine_double_vie":False
+                "mine":{"mine_empoisonnee":False,                   
+                        "mine_fragmentation":False,                 ##Fait
+                        "mine_double_vie":False                     ##Fait
                         },
                 "aura":{"aura_trainee":False,
-                        "aura_scaling":False,
+                        "aura_affaiblissante":False,
                         "aura_pulse":False
                         },
                 "tourelle":{"tourelle_explosive":False,
