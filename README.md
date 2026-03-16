@@ -87,12 +87,12 @@ Version actuelle : **1.0**
 
 * Evan Miniscloux
 * Evan Berthelin
-* Mael Barbaros
+* Mael Barbaro
 
 **Design graphique :**
 
 * Evan Berthelin
-* Mael Barbaros
+* Mael Barbaro
 
 **Sound Designer :**
 
