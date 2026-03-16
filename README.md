@@ -81,18 +81,18 @@ Version actuelle : **1.0**
 
 * Evan Miniscloux = Portono
 * Evan Berthelin    = Enma-EB
-* Mael Barbaro     = Oltorc/Kolkien
+* Maël Barbaro     = Oltorc/Kolkien
 
 **Développeurs :**
 
 * Evan Miniscloux
 * Evan Berthelin
-* Mael Barbaro
+* Maël Barbaro
 
 **Design graphique :**
 
 * Evan Berthelin
-* Mael Barbaro
+* Maël Barbaro
 
 **Sound Designer :**
 
