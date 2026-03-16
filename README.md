@@ -55,27 +55,11 @@ Les étapes pour installer le projet :
 
 # Démarrage
 
-Le jeu doit être lancé **depuis le dossier principal du projet**.
-Certaines ressources (sprites, musiques, fichiers JSON, etc.) sont chargées à l’aide de **chemins relatifs**. Si le programme est exécuté depuis un autre dossier, ces fichiers ne pourront pas être trouvés.
-
-Avant de lancer le jeu, assurez-vous que votre terminal se trouve dans le dossier principal du projet :
-
-```bash
-cd Champ-de-Mars
-```
-
-Puis lancez le jeu avec :
-
-```bash
-python sources/main.py
-```
-
-Exécuter directement `main.py` depuis un autre dossier ou depuis certains IDE sans définir le bon **working directory** peut provoquer des erreurs de type :
+lancez le jeu avec :
 
 ```
-FileNotFoundError: No file found
+main.py
 ```
-
 
 # Fabriqué avec
 
