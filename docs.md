@@ -40,8 +40,8 @@ Elles sont organisées en dictionnaires selon leur catégorie (statistiques, pou
 **8. save_load :**
 
 Fichier contenant les deux fonctions permettant la sauvegarde et le chargement du jeu.  
-La sauvegarde se fait automatiqueent en quittant le jeu depuis la menu pause.  
-La fonction fait appel à un dictionnaire dans lequel nous avons regroupé tout ce qui nécessite une sauvegarde(nomber de jours, améliorations, niveau, etc).
+La sauvegarde se fait automatiquement en quittant le jeu depuis la menu pause.  
+La fonction fait appel à un dictionnaire dans lequel nous avons regroupé tout ce qui nécessite une sauvegarde(nombre de jours, améliorations, niveau, etc).
 
 **9. paths.py :**
 
