@@ -1724,7 +1724,7 @@ def lancer_jeu(settings):
         mine.delai = max(500, 5000 - dico_upgrades_mine["cadence_de_tir"] * 500)
 
         duree_journee+=1
-        echelle_difficulte=nombre_journees*2+duree_journee//1200
+        echelle_difficulte=int(nombre_journees**1.8)+duree_journee//1200
 
         # Mettre à jour les spawn delays quand la difficulté change
         enemi_spawn_delay=max(4000-echelle_difficulte,500)  # On limite le spawn delay minimum à 500ms pour éviter que ce soit injouable ou que ca aille dans le negatif
