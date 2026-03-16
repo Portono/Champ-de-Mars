@@ -12,7 +12,7 @@ dico_upgrades_stats={
                 "vitesse":0,                        
                 "regen_pv":0,           
                 "vol_de_vie":0,  
-                "esquive":0  ##faut cap a 10
+                "esquive":0
                 }
 
 #------------------Upgrades armes uniques----------------------------------------
@@ -29,7 +29,7 @@ dico_upgrades_uniques={
                         "mine_fragmentation":False,                 ##Fait
                         "mine_double_vie":False                     ##Fait
                         },
-                "aura":{"aura_trainee":True,
+                "aura":{"aura_trainee":False,
                         "aura_affaiblissante":False,                ##Fait
                         "aura_pulse":False
                         },
