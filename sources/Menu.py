@@ -54,6 +54,7 @@ input_width_rect=pygame.Rect(0, 0, button_width, button_height)
 input_height_rect=pygame.Rect(0, 0, button_width, button_height)
 astropedia_button_rect=pygame.Rect(0,0,button_width,button_height)
 astropedia_back_button_rect=pygame.Rect(0,0,button_width,button_height)
+charger_button_rect=pygame.Rect(0,0,button_width,button_height)
 #Definition de texte des boutons
 height_button_text="Hauteur"
 width_button_text="Largeur"
@@ -107,7 +108,7 @@ def refresh_ui():
     """
     Cette fonction sert a rafraichir l'interface utilisateur en repositionnant les boutons et le logo en recalculant leurs positions et leurs tailles car leur position n'est calcule seulement lors de leur creation
     """
-    global play_button_rect, settings_button_rect, quit_button_rect, logo, menu_font, fullscreen_button_rect, goback_button_rect, input_width_rect,input_height_rect,screen,astropedia_back_button_rect,sound_slider,sound_volume,astropedia_button_rect
+    global play_button_rect, settings_button_rect, quit_button_rect, logo, menu_font, fullscreen_button_rect, goback_button_rect, input_width_rect,input_height_rect,screen,astropedia_back_button_rect,sound_slider,sound_volume,astropedia_button_rect,charger_button_rect
     monitor_info=pygame.display.Info()
     monitor_width=monitor_info.current_w
     monitor_height=monitor_info.current_h
@@ -154,6 +155,9 @@ def refresh_ui():
     ##Taille de AstroWantsYou
     AstroWantsYou=pygame.image.load(data_path("AstroWantsYou.png"))
     AstroWantsYou=pygame.transform.scale(AstroWantsYou,(int(AstroWantsYou.get_width()/AstroWantsYou.get_height()*height),height))
+    ##Bouton Charger
+    charger_button_rect=pygame.Rect(0,0,button_width,button_height)
+    charger_button_rect.center=(width//2, height*1.5//3.8)
     ##Taille de background
     background_import=[]
     backgrounds_flou_import=[]
@@ -177,11 +181,11 @@ def refresh_ui():
         blur = pygame.transform.scale(img,(width,height))
         backgrounds_flou.append(blur)
 
-def afficher_menu():
+def afficher_menu(armes_possedees=None):
     refresh_ui()
-    return boucle_menu()
+    return boucle_menu(armes_possedees=armes_possedees)
 
-def boucle_menu(pause=False):
+def boucle_menu(pause=False, armes_possedees=None, nombre_journees=0):
     global current_menu, play, fullscreen, fullscreen_change, resolution_change, width, height, user_width_input, width_input_toggle, user_height_input, height_input_toggle,screen,width_button_text,height_button_text,dernier_frame,image_delay,image_index,sound_slider,sound_volume
     play=False
     pygame.mixer.music.load(data_path("Mainmenu.mp3"))
@@ -213,12 +217,20 @@ def boucle_menu(pause=False):
                         screen.fill(black)
                         screen.blit(AstroWantsYou, AstroWantsYou.get_rect(center=(width//2,height//2)))
                         pygame.display.flip()
-                        return {"width": width, "height": height, "fullscreen": fullscreen, "play": True,"sound_volume":sound_volume}
+                        return {"width": width, "height": height, "fullscreen": fullscreen, "play": True,"sound_volume":sound_volume,"charger":False}
+                    if not pause and charger_button_rect.collidepoint(mouse_pos):
+                        if save_existe():
+                            pygame.mixer.music.stop()
+                            screen.fill(black)
+                            screen.blit(AstroWantsYou, AstroWantsYou.get_rect(center=(width//2,height//2)))
+                            pygame.display.flip()
+                            return {"width": width, "height": height, "fullscreen": fullscreen, "play": True, "sound_volume": sound_volume,"charger":True}
+                        # sinon on ne fait rien (ou on affiche un message)
                     if settings_button_rect.collidepoint(mouse_pos):   ##Si le bouton Settings est appuye
                         current_menu=menu_settings
                     if quit_button_rect.collidepoint(mouse_pos):
-                        if pause:
-                            sauvegarder_jeu()
+                        if pause and armes_possedees is not None:
+                            sauvegarder_jeu(armes_possedees, nombre_journees)
                         pygame.quit()       ##Quitte pygame
                         exit()      ##Quitte le programme
                     if astropedia_button_rect.collidepoint(mouse_pos):
@@ -278,12 +290,19 @@ def boucle_menu(pause=False):
             screen.blit(logo,(0,0))     ##Affichage du logo en haut de l'ecran
             user_width_input=width_button_text
             user_height_input=height_button_text
-            for rect,texte in [(play_button_rect,"Reprendre" if pause else "Jouer"),(settings_button_rect,"Parametres"),(quit_button_rect,"Quitter"),(astropedia_button_rect,"Astropedia")]:
-                if rect.collidepoint(mouse_pos):    ##Si la souris est au dessus du bouton
-                    button_color=hover_color    ##Change la couleur du bouton
+            if pause:
+                boutons = [(play_button_rect, "Reprendre"), (settings_button_rect, "Parametres"), (quit_button_rect, "Quitter")]
+            else:
+                boutons = [(play_button_rect, "Nouvelle partie"), (charger_button_rect, "Charger"), (settings_button_rect, "Parametres"), (quit_button_rect, "Quitter"), (astropedia_button_rect, "Astropedia")]
+
+            for rect, texte in boutons:
+                if rect == charger_button_rect and not save_existe():
+                    couleur = (50, 50, 50)  # gris foncé = désactivé
+                elif rect.collidepoint(mouse_pos):
+                    couleur = hover_color
                 else:
-                    button_color=black
-                pygame.draw.rect(screen,button_color, rect, border_radius=100)   ##Dessin du bouton
+                    couleur = black
+                pygame.draw.rect(screen, couleur, rect, border_radius=100)
                 texte_surface=menu_font.render(texte,True,orange)    ##Creation du texte
                 texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
                 screen.blit(texte_surface, texte_rect)  ##Affichage du texte
