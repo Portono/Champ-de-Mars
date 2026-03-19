@@ -388,7 +388,7 @@ class projectile_laser(projectiles_general):
         if not dico_upgrades_uniques["laser"]["laser_electrique"]:
             return
 
-        max_chaines = 5
+        max_chaines = 3
         distance_arc = width/5+dico_upgrades_laser["portee"]*40
 
         touches = [ennemi_initial]
@@ -414,7 +414,7 @@ class projectile_laser(projectiles_general):
 
             liste_arcs.append(arc_electrique(source.x,source.y,cible.x,cible.y,arc_electrique_sprite))
 
-            mort = cible.prendre_degats(self.degat)
+            mort = cible.prendre_degats(self.degat//2)
 
             if dico_upgrades_uniques["laser"]["laser_ralentissant"]:
                 cible.appliquer_slow(0.2,2500)
