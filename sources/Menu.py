@@ -98,6 +98,8 @@ for i in range(1, 6):
     astropedia_images.append(img)
 astropedia_index = 0
 
+#Game Icon
+game_icon=pygame.image.load(data_path("ChampDeMarsLogo.png"))
 image_index=0
 image_delay=200
 dernier_frame=pygame.time.get_ticks()
@@ -195,6 +197,8 @@ def refresh_ui():
         backgrounds_flou.append(blur)
 
 def afficher_menu(armes_possedees=None):
+    pygame.display.set_icon(game_icon)
+    pygame.display.set_caption('Champ de Mars')
     refresh_ui()
     return boucle_menu(armes_possedees=armes_possedees)
 
