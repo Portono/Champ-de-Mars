@@ -28,9 +28,9 @@ dico_upgrades_uniques={
                         "mine_fragmentation":False,                 ##Fait
                         "mine_double_vie":False                     ##Fait
                         },
-                "aura":{"aura_trainee":False,
+                "aura":{"aura_scale":False,
                         "aura_affaiblissante":False,                ##Fait
-                        "aura_pulse":False
+                        "aura_rage":False
                         },
                 "tourelle":{"tourelle_explosive":False,             ##Fait
                             "tourelle_aoe_defensive":False,         ##Fait
