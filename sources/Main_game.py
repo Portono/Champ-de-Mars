@@ -752,21 +752,31 @@ class aura:
 
             self.temps_dernier_tick = maintenant
 
+            # Comptage
+            ennemis_dans_aura=[]
             for ennemi in liste_ennemis:
+                if self.ennemi_dans_aura(ennemi, player_x, player_y):
+                    ennemis_dans_aura.append(ennemi)
 
-                dist = math.hypot(
-                    ennemi.x - player_x,
-                    ennemi.y - player_y
-                )
+            # Calcul dégâts
+            degat_total = 1 + dico_upgrades_aura["degat"]
 
-                if dist <= self.rayon:
+            if dico_upgrades_uniques["aura"]["aura_surpopulation"]:
+                facteur = 1.2 ** max(0, len(ennemis_dans_aura) - 1)     ##Pour pas avoir de bonus si il y a 1 seul ennemi
+                facteur = min(facteur, 5)
+                degat_total *= facteur
 
-                    mort = ennemi.prendre_degats(self.degat)
-                    global pv_joueur
-                    pv_joueur=min(pv_max_joueur,pv_joueur+dico_upgrades_stats["vol_de_vie"]*self.degat)
-                    if mort and xp_callback:
-                        xp_callback(ennemi.xp)
-    
+
+            # Application
+            for ennemi in ennemis_dans_aura:
+                mort = ennemi.prendre_degats(degat_total)
+
+                global pv_joueur
+                pv_joueur = min(pv_max_joueur, pv_joueur + dico_upgrades_stats["vol_de_vie"] * degat_total)
+
+                if mort and xp_callback:
+                    xp_callback(ennemi.xp)
+
     def ennemi_dans_aura(self,ennemi,player_x,player_y):
         if ennemi is None:
             return False
