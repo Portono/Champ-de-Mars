@@ -28,7 +28,7 @@ dico_upgrades_uniques={
                         "mine_fragmentation":False,                 ##Fait
                         "mine_double_vie":False                     ##Fait
                         },
-                "aura":{"aura_scale":False,
+                "aura":{"aura_surpopulation":False,                 ##Fait
                         "aura_affaiblissante":False,                ##Fait
                         "aura_rage":False
                         },
