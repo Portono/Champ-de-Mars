@@ -308,7 +308,7 @@ def boucle_menu(pause=False, armes_possedees=None, nombre_journees=0):
             user_width_input=width_button_text
             user_height_input=height_button_text
             if pause:
-                boutons = [(play_button_rect, "Reprendre"), (settings_button_rect, "Parametres"), (quit_button_rect, "Quitter")]
+                boutons = [(play_button_rect, "Reprendre"), (settings_button_rect, "Parametres"), (quit_button_rect, "Quitter"),(astropedia_button_rect, "Astropedia")]
             else:
                 boutons = [(play_button_rect, "Nouvelle partie"), (charger_button_rect, "Charger"), (settings_button_rect, "Parametres"), (quit_button_rect, "Quitter"), (astropedia_button_rect, "Astropedia")]
 
