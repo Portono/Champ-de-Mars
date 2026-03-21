@@ -1251,7 +1251,7 @@ def lancer_jeu(settings):
     liste_arcs=[]
     taille_base = int(TILE_SIZE * zoom)
     # On ajoute 1 pixel pour l'overlapping
-    taille_overlap = taille_base + 1 
+    taille_overlap = taille_base + 2
     textures_zoom = {}
     for key, surf in textures.items():
         # On scale avec le pixel supplémentaire
