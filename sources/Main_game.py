@@ -1804,7 +1804,7 @@ def lancer_jeu(settings):
         texte_niveau_rect=texte_niveau.get_rect(topleft=(width/150,height/20))
         screen.blit(texte_niveau,texte_niveau_rect)
 
-        texte_journee=font.render(f"Journee:{nombre_journees}",True,(255,165,0))
+        texte_journee=font.render(f"Journee:{nombre_journees}",True,(0,0,0))
         texte_journee_rect=texte_journee.get_rect(center=(width/2,height/40))
         screen.blit(texte_journee,texte_journee_rect)
 
