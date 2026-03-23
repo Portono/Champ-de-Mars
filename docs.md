@@ -53,7 +53,7 @@ C'est la où est créée la fonction pour trouver le chemin des fichiers dans d'
 
 **1. .png :**
 
-Les : "(1)" ou avec d'autres nombres sont là pour programmer les animations.
+*Les : "(1)" ou avec d'autres nombres sont là pour programmer les animations.*
 
 Ce sont pour les sprites :
 - des personnages
