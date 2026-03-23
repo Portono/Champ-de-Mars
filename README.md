@@ -48,10 +48,8 @@ afin d'installer toutes les bibliothèques nécessaires.
 
 Les étapes pour installer le projet :
 
-1. Télécharger la **dernière Release** du projet depuis GitHub.
-2. Extraire le fichier **.zip** téléchargé.
-3. Ouvrir le dossier du projet extrait.
-4. Installer les bibliothèques requises si nécessaire.
+1. Ouvrir le dossier du projet.
+2. Installer les bibliothèques requises si nécessaire.
 
 # Démarrage
 
