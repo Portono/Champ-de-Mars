@@ -52,7 +52,7 @@ La fonction fait appel à un dictionnaire dans lequel nous avons regroupé tout 
 
 **1. .png :**
 
-Les : "(1)" ou avec d'autres nombres sont là pour programmer les animations.
+*Les : "(1)" ou avec d'autres nombres sont là pour programmer les animations.*
 
 Ce sont pour les sprites :
 - des personnages
