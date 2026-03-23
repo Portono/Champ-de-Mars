@@ -1,1 +1,1 @@
-pres globale
+Projet : développement d’un jeu de survie en Python avec la bibliothèque Pygame. L’idée était de créer un jeu simple mais évolutif. Problématique : maintenir l’intérêt du joueur dans le temps. Objectif : proposer une difficulté progressive avec des choix d’amélioration. Travail en équipe avec répartition des tâches techniques. Développement en plusieurs étapes avec tests réguliers. Le projet a permis d’appliquer concrètement des notions de programmation et de travail en équipe.
