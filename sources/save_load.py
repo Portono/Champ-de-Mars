@@ -11,8 +11,33 @@ from random_module import (dico_upgrades_stats, dico_upgrades_uniques,
                            dico_upgrades_laser, dico_upgrades_roquette,
                            dico_upgrades_mine, dico_upgrades_aura,
                            dico_upgrades_tourelle)
+def _charger_donnees_sauvegarde():
+    try:
+        with open(data_path(SAVE_FILE), "r") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+def charger_meilleur_score():
+    data = _charger_donnees_sauvegarde()
+    return max(data.get("meilleur_score", 0), data.get("nombre_journees", 0))
+
+def charger_score():
+    return charger_meilleur_score()
+
+def mettre_a_jour_meilleur_score(nombre_journees):
+    data = _charger_donnees_sauvegarde()
+    meilleur_score = max(data.get("meilleur_score", 0), nombre_journees)
+    data["meilleur_score"] = meilleur_score
+
+    with open(data_path(SAVE_FILE), "w") as f:
+        json.dump(data, f, indent=4)
+
+    return meilleur_score
+
 
 def sauvegarder_jeu(armes_possedees,nombre_journees=0):
+    meilleur_score = max(charger_meilleur_score(), nombre_journees)
     data = {
         "dico_upgrades_stats": dico_upgrades_stats,
         "dico_upgrades_uniques": dico_upgrades_uniques,
@@ -22,7 +47,8 @@ def sauvegarder_jeu(armes_possedees,nombre_journees=0):
         "dico_upgrades_aura": dico_upgrades_aura,
         "dico_upgrades_tourelle": dico_upgrades_tourelle,
         "armes_possedees": armes_possedees,
-        "nombre_journees": nombre_journees
+        "nombre_journees": nombre_journees,
+        "meilleur_score":meilleur_score
     }
     with open(data_path(SAVE_FILE), "w") as f:
         json.dump(data, f, indent=4)
