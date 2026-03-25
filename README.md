@@ -73,9 +73,13 @@ Musiques et sons réalisés avec **UltraaBox**
 
 Version actuelle : **1.0**
 
+# Dépôt GitHub officiel
+
+Le code source complet du projet, ainsi que l'historique des versions et les mises à jour, sont disponibles sur GitHub [ici](https://github.com/Portono/Champ-de-Mars)
+
 # Auteurs
 
-**Alias :**
+**Alias(sur Github) :**
 
 * Evan Miniscloux = Portono
 * Evan Berthelin    = Enma-EB
@@ -95,10 +99,6 @@ Version actuelle : **1.0**
 **Sound Designer :**
 
 * Evan Berthelin
-
-# Dépôt GitHub officiel
-
-Le code source complet du projet, ainsi que l'historique des versions et les mises à jour, sont disponibles sur GitHub [ici](https://github.com/Portono/Champ-de-Mars)
 
 # License
 
