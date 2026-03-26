@@ -206,7 +206,7 @@ def afficher_upgrades(screen, width, height, nb_upgrades, armes_possedees, font,
             est_unique = (arme in dico_upgrades_uniques and stat in dico_upgrades_uniques[arme])
 
             if est_unique:
-                couleur = (255, 255, 0) if scale > 1 else (255, 0, 0)  # jaune hover, rouge normal
+                couleur = (127,0,255) if scale > 1 else (255, 0, 0)  # jaune hover, rouge normal
             else:
                 couleur = (0, 255, 0) if scale > 1 else (0, 200, 0)
 
