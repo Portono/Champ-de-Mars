@@ -823,8 +823,8 @@ class tourelle:
         self.y = y
         self.sprite = sprite_batiment
         self.nom = "Tourelle"
-        self.hp = 100+dico_upgrades_tourelle["hp"]
-        self.max_hp = 100+dico_upgrades_tourelle["hp"]
+        self.hp = 150+dico_upgrades_tourelle["hp"]
+        self.max_hp = 150+dico_upgrades_tourelle["hp"]
         self.delai_spawn=delai_spawn
         self.dernier_spawn=pygame.time.get_ticks()
 
