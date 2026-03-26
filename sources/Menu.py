@@ -327,11 +327,11 @@ def boucle_menu(pause=False, armes_possedees=None, nombre_journees=0):
                 texte_surface=menu_font.render(texte,True,orange)    ##Creation du texte
                 texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
                 screen.blit(texte_surface, texte_rect)  ##Affichage du texte
-            if save_existe() and not pause:
-                score = charger_meilleur_score()
-                texte_score = menu_font.render(f"Meilleur score : {score}", True, white)
-                texte_score_rect = texte_score.get_rect(bottomright=(width - int(width * 0.02), height - int(height * 0.02)))
-                screen.blit(texte_score, texte_score_rect)
+                if save_existe() and not pause:
+                    score = charger_meilleur_score()
+                    texte_score = menu_font.render(f"Meilleur score : {score}", True, white)
+                    texte_score_rect = texte_score.get_rect(bottomright=(width - int(width * 0.02), height - int(height * 0.02)))
+                    screen.blit(texte_score, texte_score_rect)
 
         if current_menu==menu_settings: #les boutons dans le menu des parametres
             #Texte de la resolution actuelle
