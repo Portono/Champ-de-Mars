@@ -3,6 +3,7 @@ from paths import data_path
 import os
 
 SAVE_FILE = "save.json"
+SCORE_FILE="score"
 
 def save_existe():
     return os.path.exists(data_path(SAVE_FILE))
@@ -24,20 +25,20 @@ def _charger_donnees_sauvegarde():
         return {}
 
 def charger_meilleur_score():
-    data = _charger_donnees_sauvegarde()
-    return max(data.get("meilleur_score", 0), data.get("nombre_journees", 0))
+    try:
+        with open(data_path(SCORE_FILE), "r") as f:
+            return max(0, int(f.read().strip() or "0"))
+    except (FileNotFoundError, ValueError):
+        data = _charger_donnees_sauvegarde()
+        return max(data.get("meilleur_score", 0), data.get("nombre_journees", 0))
 
 def charger_score():
     return charger_meilleur_score()
 
 def mettre_a_jour_meilleur_score(nombre_journees):
-    data = _charger_donnees_sauvegarde()
-    meilleur_score = max(data.get("meilleur_score", 0), nombre_journees)
-    data["meilleur_score"] = meilleur_score
-
-    with open(data_path(SAVE_FILE), "w") as f:
-        json.dump(data, f, indent=4)
-
+    meilleur_score = max(charger_meilleur_score(), nombre_journees)
+    with open(data_path(SCORE_FILE), "w") as f:
+        f.write(str(meilleur_score))
     return meilleur_score
 
 
